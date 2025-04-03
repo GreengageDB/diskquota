@@ -1,0 +1,5 @@
+CREATE SCHEMA s1;
+DO $$BEGIN
+    PERFORM diskquota.set_schema_quota('s1', '1 MB');
+END$$;
+DROP SCHEMA s1;
