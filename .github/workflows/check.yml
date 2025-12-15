@@ -10,13 +10,64 @@ on:
       - "*.md"
       - "*.sql"
 
+# Concurrency control to cancel previous runs on new push to same PR/branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true  # Automatically cancel any previous runs for the same group
+
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: use clang-format 13
         run: pip3 install clang-format==13.0.1
       - name: Check clang code style
         run: git ls-files *.{c,h} | xargs clang-format -i --style=file && git diff --exit-code
 
+  build_and_test:
+    name: Regression tests on Greengage ${{ matrix.gg_version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gg_version: [6, 7]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          filter: tree:0
+          submodules: 'recursive'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./ci/Dockerfile
+          load: true
+          push: false
+          tags: diskquota:test
+          build-args: |
+            GGDB_IMAGE=ghcr.io/greengagedb/greengage/ggdb${{ matrix.gg_version }}_ubuntu:latest
+
+      - name: Test
+        run: >
+          docker run --rm
+          --sysctl 'kernel.sem=500 1024000 200 4096'
+          -v /tmp/logs:/logs
+          diskquota:test
+          bash /home/gpadmin/diskquota/ci/test_in_docker.bash
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: discquota_ggdb${{ matrix.gg_version }}_ubuntu_logs
+          path: /tmp/logs/*
