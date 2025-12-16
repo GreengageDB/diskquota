@@ -75,6 +75,13 @@ extern int diskquota_worker_timeout;
 #define DiskquotaGetRelstorage(classForm) (0)
 #endif /* GP_VERSION_NUM */
 
+#define EXTENSION_DDL_MESSAGE_SIZE sizeof(ExtensionDDLMessage)
+#define ACTIVE_TABLES_MAP_ENTRY_SIZE sizeof(DiskQuotaActiveTableFileEntry)
+#define RELATION_CACHE_ENTRY_SIZE sizeof(DiskQuotaRelationCacheEntry)
+#define RELID_CACHE_ENTRY_SIZE sizeof(DiskQuotaRelidCacheEntry)
+#define ALTERED_RELOID_CACHE_ENTRY_SIZE sizeof(Oid)
+#define MONITORED_DBID_CACHE_ENTRY_SIZE sizeof(struct MonitorDBEntryStruct)
+
 typedef enum
 {
 	NAMESPACE_QUOTA = 0,
@@ -316,6 +323,7 @@ extern HTAB        *diskquota_hash_create(const char *tabname, long nelem, HASHC
                                           DiskquotaHashFunction hashFunction);
 extern HTAB *DiskquotaShmemInitHash(const char *name, long init_size, long max_size, HASHCTL *infoP, int hash_flags,
                                     DiskquotaHashFunction hash_function);
+extern void *DiskquotaShmemInitStruct(const char *name, Size size, bool *foundPtr);
 extern void  refresh_monitored_dbid_cache(void);
 extern HASHACTION check_hash_fullness(HTAB *hashp, int max_size, const char *warning_message,
                                       TimestampTz *last_overflow_report);
