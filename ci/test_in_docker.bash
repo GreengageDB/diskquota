@@ -18,9 +18,10 @@ make install
 gpinitstandby -ar
 
 export SHOW_REGRESS_DIFF=1
+errors=0
 
 # test without standby
-cmake --build . --target installcheck || errors=$?
+cmake --build . --target installcheck || errors=$(( errors + $? ))
 
 cp tests/regress/regression.diffs /logs/regression_regress_with_standby.diffs || true
 cp tests/isolation2/regression.diffs /logs/regression_isolation_with_standby.diffs || true
