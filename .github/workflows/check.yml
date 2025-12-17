@@ -26,48 +26,58 @@ jobs:
         run: git ls-files *.{c,h} | xargs clang-format -i --style=file && git diff --exit-code
 
   build_and_test:
-    name: Regression tests on Greengage ${{ matrix.gg_version }}
+    name: Regression tests on Greengage ${{ matrix.version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        gg_version: [6, 7]
-
+        include:
+          - name: Greengage 6
+            version: 6
+            image: ghcr.io/greengagedb/greengage/ggdb6_ubuntu:latest
+          - name: Greengage 7
+            version: 7
+            image: ghcr.io/greengagedb/greengage/ggdb7_ubuntu:latest
+    container:
+      image: ${{ matrix.image }}
+      options:
+        --sysctl "kernel.sem=500 1024000 200 4096"
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: tree:0
-          submodules: 'recursive'
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        with:
-          version: latest
-
-      - name: Build
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: ./ci/Dockerfile
-          load: true
-          push: false
-          tags: diskquota:test
-          build-args: |
-            GGDB_IMAGE=ghcr.io/greengagedb/greengage/ggdb${{ matrix.gg_version }}_ubuntu:latest
-
-      - name: Test
-        run: >
-          docker run --rm
-          --sysctl 'kernel.sem=500 1024000 200 4096'
-          -v /tmp/logs:/logs
-          diskquota:test
-          bash /home/gpadmin/diskquota/ci/test_in_docker.bash
-
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Build and install
+        shell: bash
+        run: |
+          source gpdb_src/concourse/scripts/common.bash
+          install_and_configure_gpdb
+          gpdb_src/concourse/scripts/setup_gpadmin_user.bash
+          make_cluster
+          mkdir -p /logs
+          chown gpadmin:gpadmin /logs
+          chown -R gpadmin:gpadmin "$GITHUB_WORKSPACE"
+        working-directory: /home/gpadmin/
+      - name: Tests
+        run: sudo -u gpadmin bash ci/test_in_docker.bash
+      - name: collect logs
+        if: always()
+        shell: bash
+        run: |
+          cd /home/gpadmin/
+          params=(
+            "./ d gpAdminLogs"
+            "$GITHUB_WORKSPACE/tests/ d results"
+            "$GITHUB_WORKSPACE/tests/ f regression.diffs"
+            "gpdb_src/gpAux/gpdemo/datadirs/ d log"
+            "gpdb_src/gpAux/gpdemo/datadirs/ d pg_log"
+          )
+          for param in "${params[@]}"; do
+            read -r path type name <<< "$param"
+            find $path -name $name -type $type -exec tar -rf "/logs/$name.tar" {} \;
+          done
+        working-directory: /home/gpadmin/
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: diskquota_ggdb${{ matrix.gg_version }}_ubuntu_logs
-          path: /tmp/logs/*
+          name: diskquota_ggdb${{ matrix.version }}_ubuntu_logs
+          path: /logs/*
