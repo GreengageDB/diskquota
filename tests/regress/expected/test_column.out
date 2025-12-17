@@ -10,7 +10,7 @@ SET search_path TO scolumn;
 SELECT diskquota.wait_for_worker_new_epoch();
  wait_for_worker_new_epoch 
 ---------------------------
- t
+ f
 (1 row)
 
 CREATE TABLE a2(i INT) DISTRIBUTED BY (i);
