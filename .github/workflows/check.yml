@@ -58,7 +58,7 @@ jobs:
         working-directory: /home/gpadmin/
       - name: Tests
         run: sudo -u gpadmin bash ci/test_in_docker.bash
-      - name: collect logs
+      - name: Collect logs
         if: always()
         shell: bash
         run: |
