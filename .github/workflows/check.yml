@@ -62,7 +62,6 @@ jobs:
         if: always()
         shell: bash
         run: |
-          cd /home/gpadmin/
           params=(
             "./ d gpAdminLogs"
             "$GITHUB_WORKSPACE/tests/ d results"
