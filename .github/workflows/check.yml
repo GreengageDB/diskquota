@@ -69,5 +69,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: discquota_ggdb${{ matrix.gg_version }}_ubuntu_logs
+          name: diskquota_ggdb${{ matrix.gg_version }}_ubuntu_logs
           path: /tmp/logs/*
