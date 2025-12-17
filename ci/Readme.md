@@ -2,14 +2,14 @@
 
 6X:
 ```bash
-docker build -t gpdb6_distquota -f ci/Dockerfile .
-docker run --rm -it -v /tmp/logs:/logs gpdb6_distquota:latest bash
+docker build -t gpdb6_diskquota -f ci/Dockerfile .
+docker run --rm -it -v /tmp/logs:/logs gpdb6_diskquota:latest bash
 ```
 
 7X:
 ```bash
-docker build -t gpdb7_distquota -f ci/Dockerfile --build-arg GGDB_IMAGE=ghcr.io/greengagedb/greengage/ggdb7_ubuntu:latest .
-docker run --rm -it -v /tmp/logs:/logs gpdb7_distquota:latest bash
+docker build -t gpdb7_diskquota -f ci/Dockerfile --build-arg GGDB_IMAGE=ghcr.io/greengagedb/greengage/ggdb7_ubuntu:latest .
+docker run --rm -it -v /tmp/logs:/logs gpdb7_diskquota:latest bash
 ```
 
 ```bash
