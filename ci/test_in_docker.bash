@@ -15,7 +15,7 @@ cmake ..
 cmake --build .
 make install
 
-gpinitstandby -ar;
+gpinitstandby -ar
 
 export SHOW_REGRESS_DIFF=1
 
