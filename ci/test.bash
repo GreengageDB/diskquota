@@ -16,8 +16,8 @@ tar -czf "/logs/result.tar.gz" \
   "tests/regress/results" \
   "tests/isolation2/results"
 
-cp tests/regress/regression.diffs /logs/regression_regress_with_standby.diffs || true
-cp tests/isolation2/regression.diffs /logs/regression_isolation_with_standby.diffs || true
+cp tests/regress/regression.diffs /logs/regression_regress.diffs || true
+cp tests/isolation2/regression.diffs /logs/regression_isolation.diffs || true
 
 gpstop -may -M immediate
 export MASTER_DATA_DIRECTORY=/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/standby
@@ -32,7 +32,7 @@ tar -czf "/logs/result_standby.tar.gz" \
   "tests/regress/results" \
   "tests/isolation2/results"
 
-cp tests/regress/regression.diffs /logs/regression_regress_without_standby.diffs || true
-cp tests/isolation2/regression.diffs /logs/regression_isolation_without_standby.diffs || true
+cp tests/regress/regression.diffs /logs/regression_regress_standby.diffs || true
+cp tests/isolation2/regression.diffs /logs/regression_isolation_standby.diffs || true
 
 exit $errors
