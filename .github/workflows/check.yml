@@ -48,16 +48,10 @@ jobs:
       - name: Build and install
         shell: bash
         run: |
-          source gpdb_src/concourse/scripts/common.bash
-          install_and_configure_gpdb
-          gpdb_src/concourse/scripts/setup_gpadmin_user.bash
-          make_cluster
-          mkdir -p /logs
-          chown gpadmin:gpadmin /logs
+          bash ci/install.bash
           chown -R gpadmin:gpadmin "$GITHUB_WORKSPACE"
-        working-directory: /home/gpadmin/
       - name: Tests
-        run: sudo -u gpadmin bash ci/test_in_docker.bash
+        run: sudo -u gpadmin bash ci/test.bash
       - name: Collect logs
         if: always()
         shell: bash
