@@ -47,7 +47,7 @@ jobs:
         uses: actions/checkout@v5
       - name: Build and install
         shell: bash
-        run: bash ci/install.bash
+        run: bash $GITHUB_WORKSPACE/ci/install.bash
         working-directory: /home/gpadmin
       - name: Tests
         run: sudo -u gpadmin bash ci/test.bash
