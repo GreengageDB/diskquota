@@ -18,7 +18,6 @@ make install
 export SHOW_REGRESS_DIFF=1
 errors=0
 
-# test without standby
 cmake --build . --target installcheck || errors=$(( errors + $? ))
 
 cp tests/regress/regression.diffs /logs/regression_regress_with_standby.diffs || true
@@ -29,7 +28,7 @@ export MASTER_DATA_DIRECTORY=/home/gpadmin/gpdb_src/gpAux/gpdemo/datadirs/standb
 export PGPORT=$(( PGPORT + 1 ))
 gpactivatestandby -a -f -d $MASTER_DATA_DIRECTORY
 
-# test with standby
+# Run test again with standby master
 cmake --build . --target installcheck || errors=$(( errors + $? ))
 
 cp tests/regress/regression.diffs /logs/regression_regress_without_standby.diffs || true
