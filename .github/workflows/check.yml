@@ -26,7 +26,7 @@ jobs:
         run: git ls-files *.{c,h} | xargs clang-format -i --style=file && git diff --exit-code
 
   build_and_test:
-    name: Regression tests on Greengage ${{ matrix.version }}
+    name: Greengage ${{ matrix.version }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
