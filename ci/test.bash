@@ -5,15 +5,7 @@ set -xeu
 source /usr/local/greengage-db-devel/greengage_path.sh
 source /home/gpadmin/gpdb_src/gpAux/gpdemo/gpdemo-env.sh
 
-pushd /home/gpadmin/gpdb_src
-  make -C src/test/isolation2 install
-popd
-
-# build and install
-mkdir build && cd build
-cmake ..
-cmake --build .
-make install
+cd build
 
 export SHOW_REGRESS_DIFF=1
 errors=0
