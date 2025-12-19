@@ -12,7 +12,7 @@ errors=0
 
 cmake --build . --target installcheck || errors=$(( errors + $? ))
 
-tar -czf "/logs/result.tar.gz" \
+tar --dereference -czf "/logs/result.tar.gz" \
   "tests/regress/results" \
   "tests/isolation2/results"
 
@@ -28,7 +28,7 @@ gpactivatestandby -a -f -d $MASTER_DATA_DIRECTORY
 # Run test again with standby master
 cmake --build . --target installcheck || errors=$(( errors + $? ))
 
-tar -czf "/logs/result_standby.tar.gz" \
+tar --dereference -czf "/logs/result_standby.tar.gz" \
   "tests/regress/results" \
   "tests/isolation2/results"
 
