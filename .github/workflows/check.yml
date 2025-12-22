@@ -26,6 +26,7 @@ jobs:
         run: git ls-files *.{c,h} | xargs clang-format -i --style=file && git diff --exit-code
 
   build_and_test:
+    needs: lint
     name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
