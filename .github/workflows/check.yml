@@ -27,7 +27,7 @@ jobs:
 
   build_and_test:
     needs: lint
-    name: ${{ matrix.name }}
+    name: ${{ matrix.name || 'Regression Tests' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
