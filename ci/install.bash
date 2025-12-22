@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -xeu
+set -xeo pipefail
 
 source gpdb_src/concourse/scripts/common.bash
 install_and_configure_gpdb

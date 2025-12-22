@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -xeu
+set -xeuo pipefail
 
 source /usr/local/greengage-db-devel/greengage_path.sh
 source /home/gpadmin/gpdb_src/gpAux/gpdemo/gpdemo-env.sh
