@@ -35,4 +35,7 @@ tar --dereference -czf "/logs/result_standby.tar.gz" \
 cp tests/regress/regression.diffs /logs/regression_regress_standby.diffs || true
 cp tests/isolation2/regression.diffs /logs/regression_isolation_standby.diffs || true
 
-exit $errors
+if [ -n "$errors" ]; then
+  exit 1
+fi
+exit 0

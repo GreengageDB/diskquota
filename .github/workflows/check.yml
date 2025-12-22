@@ -19,14 +19,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: use clang-format 13
         run: pip3 install clang-format==13.0.1
       - name: Check clang code style
         run: git ls-files *.{c,h} | xargs clang-format -i --style=file && git diff --exit-code
 
   build_and_test:
-    name: Greengage ${{ matrix.version }}
+    name: ${{ matrix.name }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -50,7 +50,7 @@ jobs:
         run: bash $GITHUB_WORKSPACE/ci/install.bash
         working-directory: /home/gpadmin
       - name: Tests
-        run: sudo -u gpadmin bash ci/test.bash
+        run: su gpadmin -c 'bash ci/test.bash'
       - name: Collect logs
         if: always()
         shell: bash

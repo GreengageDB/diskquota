@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -xeu
 
 source gpdb_src/concourse/scripts/common.bash
 install_and_configure_gpdb
