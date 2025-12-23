@@ -42,9 +42,10 @@
 #define MAX_NUM_KEYS_QUOTA_MAP 8
 /* init number of QuotaInfoEntry in quota_info_map */
 #define INIT_QUOTA_MAP_ENTRIES 128
-#define AVG_QUOTA_MAP_ENTRIES (diskquota_max_quota_probes / diskquota_max_monitored_databases)
 /* max number of QuotaInfoEntry in quota_info_map */
-#define MAX_QUOTA_MAP_ENTRIES (AVG_QUOTA_MAP_ENTRIES < 1024 ? 1024 : AVG_QUOTA_MAP_ENTRIES)
+#define MAX_QUOTA_MAP_ENTRIES                                                                                         \
+	(diskquota_max_quota_probes < 1024 * diskquota_max_monitored_databases ? 1024 * diskquota_max_monitored_databases \
+	                                                                       : diskquota_max_quota_probes)
 
 typedef enum
 {
@@ -81,6 +82,14 @@ extern int diskquota_worker_timeout;
 #define RELID_CACHE_ENTRY_SIZE sizeof(DiskQuotaRelidCacheEntry)
 #define ALTERED_RELOID_CACHE_ENTRY_SIZE sizeof(Oid)
 #define MONITORED_DBID_CACHE_ENTRY_SIZE sizeof(struct MonitorDBEntryStruct)
+#define DISKQUOTA_TABLE_SIZE_ENTRY_NUM_SIZE sizeof(pg_atomic_uint32)
+#define DISKQUOTA_QUOTA_INFO_ENTRY_NUM_SIZE sizeof(pg_atomic_uint32)
+
+#ifdef USE_ASSERT_CHECKING
+#define DISKQUOTA_TABLE_SIZE_FLAG_SIZE sizeof(pg_atomic_flag)
+#define LOCAL_DISK_QUOTA_REJECT_FLAG_SIZE sizeof(pg_atomic_flag)
+#define DISKQUOTA_QUOTA_INFO_FLAG_SIZE sizeof(pg_atomic_flag)
+#endif
 
 typedef enum
 {
@@ -322,9 +331,11 @@ extern void         update_monitordb_status(Oid dbid, uint32 status);
 extern HTAB        *diskquota_hash_create(const char *tabname, long nelem, HASHCTL *info, int flags,
                                           DiskquotaHashFunction hashFunction);
 extern HTAB *DiskquotaShmemInitHash(const char *name, long init_size, long max_size, HASHCTL *infoP, int hash_flags,
-                                    DiskquotaHashFunction hash_function);
+                                    DiskquotaHashFunction hash_function, pg_atomic_flag *foundPtr);
 extern void *DiskquotaShmemInitStruct(const char *name, Size size, bool *foundPtr);
 extern void  refresh_monitored_dbid_cache(void);
+extern HASHACTION check_hash_fullness_num(HTAB *hashp, int num_entries, int max_size, const char *warning_message,
+                                          TimestampTz *last_overflow_report);
 extern HASHACTION check_hash_fullness(HTAB *hashp, int max_size, const char *warning_message,
                                       TimestampTz *last_overflow_report);
 bool              SPI_push_cond_and_connect(void);
