@@ -27,20 +27,13 @@ jobs:
 
   build_and_test:
     needs: lint
-    name: ${{ matrix.name || 'Regression Tests' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - name: Greengage 6
-            version: 6
-            image: ghcr.io/greengagedb/greengage/ggdb6_ubuntu:latest
-          - name: Greengage 7
-            version: 7
-            image: ghcr.io/greengagedb/greengage/ggdb7_ubuntu:latest
+        version: [ggdb6, ggdb7]
     container:
-      image: ${{ matrix.image }}
+      image: ghcr.io/greengagedb/greengage/${{ matrix.version }}_ubuntu:latest
       options:
         --sysctl "kernel.sem=500 1024000 200 4096"
     steps:
@@ -70,5 +63,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: diskquota_ggdb${{ matrix.version }}_ubuntu_logs
+          name: diskquota_${{ matrix.version }}_ubuntu_logs
           path: /logs/*
