@@ -93,6 +93,17 @@ static int num_db = 0;
 
 static DiskquotaLauncherShmemStruct *DiskquotaLauncherShmem;
 
+/* how many TableSizeEntry are maintained in all the table_size_map in shared memory */
+pg_atomic_uint32 *diskquota_table_size_entry_num;
+
+/* how many QuotaInfoEntry are maintained in all the quota_info_map in shared memory */
+pg_atomic_uint32 *diskquota_quota_info_entry_num;
+
+#ifdef USE_ASSERT_CHECKING
+extern pg_atomic_flag *diskquota_table_size_flag;
+extern pg_atomic_flag *diskquota_quota_info_flag;
+#endif
+
 #define MIN_SLEEPTIME 100         /* milliseconds */
 #define BGWORKER_LOG_TIME 3600000 /* milliseconds */
 
@@ -1130,7 +1141,7 @@ process_extension_ddl_message()
 	ExtensionDDLMessage local_extension_ddl_message;
 
 	LWLockAcquire(diskquota_locks.extension_ddl_message_lock, LW_SHARED);
-	memcpy(&local_extension_ddl_message, extension_ddl_message, sizeof(ExtensionDDLMessage));
+	memcpy(&local_extension_ddl_message, extension_ddl_message, EXTENSION_DDL_MESSAGE_SIZE);
 	LWLockRelease(diskquota_locks.extension_ddl_message_lock);
 
 	/* create/drop extension message must be valid */
@@ -1146,7 +1157,7 @@ process_extension_ddl_message()
 
 	/* Send createdrop extension diskquota result back to QD */
 	LWLockAcquire(diskquota_locks.extension_ddl_message_lock, LW_EXCLUSIVE);
-	memset(extension_ddl_message, 0, sizeof(ExtensionDDLMessage));
+	memset(extension_ddl_message, 0, EXTENSION_DDL_MESSAGE_SIZE);
 	extension_ddl_message->launcher_pid = MyProcPid;
 	extension_ddl_message->result       = (int)code;
 	LWLockRelease(diskquota_locks.extension_ddl_message_lock);
@@ -1732,8 +1743,8 @@ void
 init_launcher_shmem()
 {
 	bool found;
-	DiskquotaLauncherShmem = (DiskquotaLauncherShmemStruct *)ShmemInitStruct("Diskquota launcher Data",
-	                                                                         diskquota_launcher_shmem_size(), &found);
+	DiskquotaLauncherShmem = (DiskquotaLauncherShmemStruct *)DiskquotaShmemInitStruct(
+	        "Diskquota launcher Data", diskquota_launcher_shmem_size(), &found);
 	memset(DiskquotaLauncherShmem, 0, diskquota_launcher_shmem_size());
 	if (!found)
 	{
@@ -1772,6 +1783,25 @@ init_launcher_shmem()
 			DiskquotaLauncherShmem->dbArray[i].workerId = INVALID_WORKER_ID;
 		}
 	}
+	/* init TableSizeEntry counter */
+	diskquota_table_size_entry_num =
+	        DiskquotaShmemInitStruct("diskquota TableSizeEntry counter", DISKQUOTA_TABLE_SIZE_ENTRY_NUM_SIZE, &found);
+	if (!found) pg_atomic_init_u32(diskquota_table_size_entry_num, 0);
+
+	/* init QuotaInfoEntry counter */
+	diskquota_quota_info_entry_num =
+	        DiskquotaShmemInitStruct("diskquota QuotaInfoEntry counter", DISKQUOTA_QUOTA_INFO_ENTRY_NUM_SIZE, &found);
+	if (!found) pg_atomic_init_u32(diskquota_quota_info_entry_num, 0);
+
+#ifdef USE_ASSERT_CHECKING
+	diskquota_table_size_flag =
+	        DiskquotaShmemInitStruct("diskquota TableSizeEntry flag", DISKQUOTA_TABLE_SIZE_FLAG_SIZE, &found);
+	if (!found) pg_atomic_init_flag(diskquota_table_size_flag);
+
+	diskquota_quota_info_flag =
+	        DiskquotaShmemInitStruct("diskquota QuotaInfoEntry flag", DISKQUOTA_QUOTA_INFO_FLAG_SIZE, &found);
+	if (!found) pg_atomic_init_flag(diskquota_quota_info_flag);
+#endif
 }
 
 /*
