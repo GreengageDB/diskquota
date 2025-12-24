@@ -27,7 +27,6 @@
 
 -- start postmaster
 -- -E needs to be changed to "-c gp_role=dispatch" for GPDB7
--- See https://github.com/greengagedb/greengage/pull/9396
 !\retcode @POSTMASTER_START_CMD@;
 -- Hopefully the bgworker can be started in 5 seconds
 !\retcode sleep 5;
