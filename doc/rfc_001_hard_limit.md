@@ -15,8 +15,8 @@ Running one single query of such types can take up all the space of a disk, whic
 
 Therefore, to mitigate the risk of having disk full issues, we plan to introduce "hard limit" in Diskquota 2.0, which enables Diskquota to terminate an in-progress query if the amount of data it writes exceeds some quota.
 
-Due to the difficulty of observing the intermediate states of an in-progress query in Greenplum, implementing hard limit is not easy. Specifically, there are two major challenges in the way:
-1. Observing intermediate states of a query under Greenplum's MVCC mechanism.
+Due to the difficulty of observing the intermediate states of an in-progress query in Greengage, implementing hard limit is not easy. Specifically, there are two major challenges in the way:
+1. Observing intermediate states of a query under Greengage's MVCC mechanism.
 2. Ensuring data consistency after seeing uncommitted changes.
 
 The rest of this doc will analyze the challenges, propose possible approaches to tackle them, and introduce the design decisions with the rationales behind.
@@ -51,7 +51,7 @@ Specifically, for each entry in the shared memory area, search the catalogs for 
 - if a tuple is found in the catalogs, that tuple must be written by the latest committed transaction and therefore must be no later than the transaction that writes the entry to the shared memory area. Therefore, the tuple in the catalogs prevails and the shared memory entry is deleted.
 - otherwise, there are still two cases:
   1. **Tuple Uncommitted:** the transaction that writes the entry to the shared memory area is the latest one and has not yet been committed. In this case, Diskquota should use the information in the shared memory entry since it is the only source.
-  2. **Tuple Deleted:** the tuple in the catalogs has been deleted by a committed transaction and the shared memory area has not been cleaned. We must prevent this case from happening because it is hard to distinguish it from the uncommitted case. Fortunately, Greenplum provides an `unlink` hook that gets called at the end of a transaction to delete files of relations. Diskquota can use the `unlink` hook to delete entries that corresponding to relations to be deleted from the shared memory area.
+  2. **Tuple Deleted:** the tuple in the catalogs has been deleted by a committed transaction and the shared memory area has not been cleaned. We must prevent this case from happening because it is hard to distinguish it from the uncommitted case. Fortunately, Greengage provides an `unlink` hook that gets called at the end of a transaction to delete files of relations. Diskquota can use the `unlink` hook to delete entries that corresponding to relations to be deleted from the shared memory area.
 
 The alignment process is summarized as the following two pieces of pseudo code:
 - Each time the Diskquota bgworker retrieves information of active relations, do

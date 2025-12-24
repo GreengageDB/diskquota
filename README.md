@@ -1,6 +1,6 @@
 # Overview
 Diskquota is an extension that provides disk usage enforcement for database 
-objects in Greenplum DB. Currently it supports to set quota limit on schema 
+objects in Greengage DB. Currently it supports to set quota limit on schema 
 and role in a given database and limit the amount of disk space that a schema 
 or a role can use. 
 
@@ -21,8 +21,8 @@ loading data into schema/role with rooms will be cancelled when the quota
 limit is reached dynamically during the query is running.
 
 # Design
-Diskquota extension is based on background worker framework in Greenplum (bg 
-worker needs pg_verion >= 9.4, which is supported in Greenplum 6 and later).
+Diskquota extension is based on background worker framework in Greengage (bg 
+worker needs pg_verion >= 9.4, which is supported in Greengage 6 and later).
 There are two kinds of background workers: diskquota launcher and diskquota worker.
 
 There is only one launcher process per database master. There is no launcher
@@ -92,7 +92,7 @@ mkdir -p <diskquota_src>/build
 cd <diskquota_src>/build
 ```
 
-If the `greenplum_path.sh` has been source:
+If the `greengage_path.sh` has been source:
 
 ```
 cmake ..
@@ -101,7 +101,7 @@ cmake ..
 Otherwise:
 
 ```
-# Without source greenplum_path.sh
+# Without source greengage_path.sh
 cmake .. --DPG_CONFIG=<gpdb_installation_dir>/bin/pg_config
 #
 ```
@@ -266,7 +266,7 @@ its owner's quota. While for schema, temp table is located under namespace
 
 # Known Issue.
 
-1. Since Greenplum doesn't support READ UNCOMMITTED isolation level,
+1. Since Greengage doesn't support READ UNCOMMITTED isolation level,
 our implementation cannot detect the new created table inside an
 uncommitted transaction (See below example). Hence enforcement on 
 that newly created table will not work. After transaction commit,

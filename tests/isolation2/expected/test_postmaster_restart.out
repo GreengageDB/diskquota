@@ -69,7 +69,6 @@ server stopped
 
 -- start postmaster
 -- -E needs to be changed to "-c gp_role=dispatch" for GPDB7
--- See https://github.com/greenplum-db/gpdb/pull/9396
 !\retcode pg_ctl -D $MASTER_DATA_DIRECTORY -w -o "-E" start;
 -- start_ignore
 waiting for server to start....2022-02-14 21:41:39.147869 CST,,,p1017570,th1516906368,,,,0,,,seg-1,,,,,"LOG","00000","registering background worker ""ftsprobe process""",,,,,,,,"RegisterBackgroundWorker","bgworker.c",773,

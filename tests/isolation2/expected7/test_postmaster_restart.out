@@ -84,10 +84,9 @@ server stopped
 
 -- start postmaster
 -- -E needs to be changed to "-c gp_role=dispatch" for GPDB7
--- See https://github.com/greenplum-db/gpdb/pull/9396
 !\retcode pg_ctl -D $MASTER_DATA_DIRECTORY -w -o "-c gp_role=dispatch" start;
 -- start_ignore
-waiting for server to start....2023-07-31 15:59:31.043830 CST,,,p854265,th579172224,,,,0,,,seg-1,,,,,"LOG","00000","starting PostgreSQL 12.12 (Greenplum Database 7.0.0-beta.4+dev.218.g9ec0a0a842 build dev) on x86_64-pc-linux-gnu, compiled by clang version 15.0.7, 64-bit",,,,,,,,"PostmasterMain","postmaster.c",1243,
+waiting for server to start....2023-07-31 15:59:31.043830 CST,,,p854265,th579172224,,,,0,,,seg-1,,,,,"LOG","00000","starting PostgreSQL 12.12 (Greengage Database 7.0.0-beta.4+dev.218.g9ec0a0a842 build dev) on x86_64-pc-linux-gnu, compiled by clang version 15.0.7, 64-bit",,,,,,,,"PostmasterMain","postmaster.c",1243,
 2023-07-31 15:59:31.044012 CST,,,p854265,th579172224,,,,0,,,seg-1,,,,,"LOG","00000","listening on IPv4 address ""0.0.0.0"", port 7000",,,,,,,,"StreamServerPort","pqcomm.c",631,
 2023-07-31 15:59:31.044060 CST,,,p854265,th579172224,,,,0,,,seg-1,,,,,"LOG","00000","listening on IPv6 address ""::"", port 7000",,,,,,,,"StreamServerPort","pqcomm.c",631,
 2023-07-31 15:59:31.044140 CST,,,p854265,th579172224,,,,0,,,seg-1,,,,,"LOG","00000","listening on Unix socket ""/tmp/.s.PGSQL.7000""",,,,,,,,"StreamServerPort","pqcomm.c",625,

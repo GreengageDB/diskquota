@@ -134,7 +134,7 @@ case "$1" in
         # Change owner to install extension
         chown -R gpadmin:gpadmin $GPHOME
         # To make fly debug easier
-        echo "source /usr/local/greenplum-db-devel/greenplum_path.sh" >> /home/gpadmin/.bashrc
+        echo "source /usr/local/greengage-db-devel/greengage_path.sh" >> /home/gpadmin/.bashrc
         su gpadmin -c \
             "source /home/gpadmin/.bashrc &&\
             OS_NAME=rhel9 /home/gpadmin/diskquota_src/concourse/test.sh"
