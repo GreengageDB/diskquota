@@ -17,8 +17,8 @@
 # PG_CPP_FLAGS - CPPFLAGS value used when PostgreSQL was built
 # PG_C_FLAGS - CFLAGS value used when PostgreSQL was built
 # PG_LD_FLAGS - LDFLAGS value used when PostgreSQL was built
-# PG_HOME - The installation directory of Greenplum
-# PG_SRC_DIR - The directory of the postgres/greenplum source code
+# PG_HOME - The installation directory of Greengage
+# PG_SRC_DIR - The directory of the postgres/greengage source code
 
 include_guard()
 find_program(PG_CONFIG pg_config)

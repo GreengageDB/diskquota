@@ -17,9 +17,9 @@ CREATE DATABASE dbx10 ;
 \! gpstop -arf
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Starting gpstop with args: -arf
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Gathering information and validating the environment...
-20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Greenplum Master catalog information
+20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Greengage Master catalog information
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Segment details from master...
-20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Greenplum Version: 'postgres (Greenplum Database) 6.20.3+dev.5.g4bc90eab02 build dev'
+20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Greengage Version: 'postgres (Greengage Database) 6.20.3+dev.5.g4bc90eab02 build dev'
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Commencing Master instance shutdown with mode='fast'
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Master segment instance directory=/Users/xiwang/gpdb/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/
 20220802:16:43:25:058210 gpstop:wxiaoran-a01:xiwang-[INFO]:-Attempting forceful termination of any leftover master process
@@ -495,9 +495,9 @@ DROP DATABASE dbx10 ;
 \! gpstop -arf;
 20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Starting gpstop with args: -arf
 20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Gathering information and validating the environment...
-20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Greenplum Master catalog information
+20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Greengage Master catalog information
 20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Obtaining Segment details from master...
-20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Greenplum Version: 'postgres (Greenplum Database) 6.20.3+dev.5.g4bc90eab02 build dev'
+20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Greengage Version: 'postgres (Greengage Database) 6.20.3+dev.5.g4bc90eab02 build dev'
 20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Commencing Master instance shutdown with mode='fast'
 20220802:16:32:34:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Master segment instance directory=/Users/xiwang/gpdb/gpAux/gpdemo/datadirs/qddir/demoDataDir-1/
 20220802:16:32:35:046832 gpstop:wxiaoran-a01:xiwang-[INFO]:-Attempting forceful termination of any leftover master process

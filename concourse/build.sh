@@ -4,7 +4,7 @@ set -exo pipefail
 
 function pkg() {
     [ -f /opt/gcc_env.sh ] && source /opt/gcc_env.sh
-    source /usr/local/greenplum-db-devel/greenplum_path.sh
+    source /usr/local/greengage-db-devel/greengage_path.sh
 
     # Always use the gcc from $PATH, to avoid using a lower version compiler by /usr/bin/cc
     export CC="$(which gcc)"
