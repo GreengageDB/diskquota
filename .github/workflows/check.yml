@@ -37,6 +37,7 @@ jobs:
       options:
         --sysctl "kernel.sem=500 1024000 200 4096"
     steps:
+      - run: df -h
       - name: Checkout
         uses: actions/checkout@v5
       - name: Build and install
