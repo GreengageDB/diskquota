@@ -52,7 +52,7 @@ jobs:
           sudo rm -rf /host_root/usr/local/share/powershell
           sudo rm -rf /host_root/usr/share/dotnet
           sudo rm -rf /host_root/usr/share/swift
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          sudo rm -rf "/host_root/$AGENT_TOOLSDIRECTORY"
 
           # Verify gains
           df -h /
