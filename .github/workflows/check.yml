@@ -41,6 +41,9 @@ jobs:
           set -eux
           df -h
           du -sh /* 2>/dev/null | sort -hr
+          du -sh /usr/* 2>/dev/null | sort -hr
+          du -sh /__t/* 2>/dev/null | sort -hr
+          du -sh /__e/* 2>/dev/null | sort -hr
           mount
 
       - name: Checkout
