@@ -38,8 +38,9 @@ jobs:
         --sysctl "kernel.sem=500 1024000 200 4096"
     steps:
       - run: |
-          df -h /
-          du -sh /* 2>/dev/null | sort -hr
+          set -eux
+          df -h
+          du -sh 2>/dev/null | sort -hr
           mount
 
       - name: Checkout
