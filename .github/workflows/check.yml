@@ -34,17 +34,28 @@ jobs:
         version: [ggdb6, ggdb7]
     container:
       image: ghcr.io/greengagedb/greengage/${{ matrix.version }}_ubuntu:latest
+      volumes:
+        - /:/host_root
       options:
         --sysctl "kernel.sem=500 1024000 200 4096"
     steps:
-      - run: |
-          set -eux
-          df -h
-          du -sh /* 2>/dev/null | sort -hr
-          du -sh /usr/* 2>/dev/null | sort -hr
-          du -sh /__t/* 2>/dev/null | sort -hr
-          du -sh /__e/* 2>/dev/null | sort -hr
-          mount
+      - name: Clean Up Disk Space
+        if: runner.os == 'Linux'
+        run: |
+          # Space usage before cleanup
+          df -h /
+
+          # Remove unused tool caches (comment any required ones with #)
+          sudo rm -rf /host_root/usr/lib/jvm
+          sudo rm -rf /host_root/usr/local/.ghcup
+          sudo rm -rf /host_root/usr/local/lib/android
+          sudo rm -rf /host_root/usr/local/share/powershell
+          sudo rm -rf /host_root/usr/share/dotnet
+          sudo rm -rf /host_root/usr/share/swift
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+
+          # Verify gains
+          df -h /
 
       - name: Checkout
         uses: actions/checkout@v5
