@@ -1,4 +1,3 @@
-
 # Overview
 Diskquota is an extension that provides disk usage enforcement for database 
 objects in Greengage DB. Currently it supports to set quota limit on schema 
