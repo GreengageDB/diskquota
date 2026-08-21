@@ -112,6 +112,47 @@ Build and install:
 make install
 ```
 
+## Building a DEB package
+
+`cpack`'s DEB generator is used (requires `dpkg-dev` for `dpkg-shlibdeps`).
+The package name and its dependency on Greengage are derived from the GPDB
+major version the extension was configured against (`diskquota6`, `diskquota7`,
+...), so build once per GPDB major version, pointing `PG_CONFIG` at that
+version's installation:
+
+```
+mkdir -p build && cd build
+cmake .. -DPG_CONFIG=<gp6_installation_dir>/bin/pg_config -DCMAKE_BUILD_TYPE=Release
+cmake --build . --target package_deb
+```
+
+```
+mkdir -p build7 && cd build7
+cmake .. -DPG_CONFIG=<gp7_installation_dir>/bin/pg_config -DCMAKE_BUILD_TYPE=Release
+cmake --build . --target package_deb
+```
+
+Each run produces a `diskquota<major>_<version>_<arch>.deb` in the build
+directory.
+
+CI builds the GP6 package in Docker via `ci/Dockerfile.ubuntu`
+(`.github/workflows/build_and_package.yml`). Greengage itself is installed
+from the `greengagedb.org` apt repository inside the image (same source
+`pxf/ci/build_in_docker.sh` uses), not baked into a base image:
+
+```
+docker build -f ci/Dockerfile.ubuntu --build-arg GP_MAJORVERSION=6 -t diskquota:gp6 .
+docker create --name tmp diskquota:gp6
+docker cp tmp:/diskquota/Package ./Package
+docker rm tmp
+```
+
+GP7 isn't built by this workflow yet: the `greengagedb.org` apt repo only
+publishes `greengage6` for Ubuntu 22.04/24.04 so far. Once `greengage7` is
+published there, add `7` back to the `gp_version` matrix in
+`build_and_package.yml` — `ci/Dockerfile.ubuntu` and `CMakeLists.txt` already
+support it via `--build-arg GP_MAJORVERSION=7` without further changes.
+
 2. Create database to store global information.
 ```
 create database diskquota;

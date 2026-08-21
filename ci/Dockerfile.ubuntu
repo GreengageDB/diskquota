@@ -1,0 +1,52 @@
+# FILE:    ci/Dockerfile.ubuntu
+# CONTEXT: Build diskquota and package it as a .deb against one GPDB major version
+# PURPOSE: Multi-stage Docker build for the diskquota extension. Greengage itself
+#          is installed from the greengagedb.org apt repository (same source
+#          pxf/ci/build_in_docker.sh uses), not baked into the base image.
+
+ARG OS_VERSION=24.04
+
+FROM ubuntu:${OS_VERSION} AS base
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+ARG GP_MAJORVERSION=6
+ENV DEBIAN_FRONTEND=noninteractive \
+    GREENGAGE_REPO_URL=https://greengagedb.org \
+    GPHOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
+ENV PATH=${GPHOME}/bin:${PATH}
+
+RUN set -eux; \
+    apt-get update -q; \
+    apt-get install -y --no-install-recommends ca-certificates curl gnupg; \
+    mkdir -p /etc/apt/keyrings; \
+    curl -fsSL "${GREENGAGE_REPO_URL}/repositories/gpg" | gpg --dearmor -o /etc/apt/keyrings/greengagedb.gpg; \
+    . /etc/os-release; \
+    echo "deb [signed-by=/etc/apt/keyrings/greengagedb.gpg] ${GREENGAGE_REPO_URL}/repositories/ubuntu/${VERSION_ID}/x86_64 greengagedb main" \
+        > /etc/apt/sources.list.d/greengagedb.list; \
+    apt-get update -q; \
+    apt-get install -y --no-install-recommends \
+        "greengage${GP_MAJORVERSION}" \
+        build-essential \
+        cmake \
+        dpkg-dev \
+        git \
+        libssl-dev \
+        libkrb5-dev \
+        file; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /var/cache/* /var/log/*
+
+FROM base AS build
+
+WORKDIR /diskquota
+COPY . .
+RUN git config --global --add safe.directory /diskquota
+
+WORKDIR /diskquota/build
+RUN cmake .. -DPG_CONFIG="${GPHOME}/bin/pg_config" -DCMAKE_BUILD_TYPE=Release && \
+    cmake --build . --target package_deb && \
+    mkdir -p /diskquota/Package && \
+    cp ./*.deb /diskquota/Package/
+
+FROM base AS artifacts
+COPY --from=build /diskquota/Package /diskquota/Package

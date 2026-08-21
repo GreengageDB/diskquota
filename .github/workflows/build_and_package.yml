@@ -1,0 +1,68 @@
+# .github/workflows/build_and_package.yml
+name: Build and Package DEB
+
+on:
+  push:
+    branches: ['master']
+    tags: ['**']
+  pull_request:
+    branches: ['**']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target_os: ubuntu
+            target_os_version: 22.04
+            gp_version: 6
+          - target_os: ubuntu
+            target_os_version: 24.04
+            gp_version: 6
+          - target_os: ubuntu
+            target_os_version: 22.04
+            gp_version: 7
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ci/Dockerfile.ubuntu
+          push: false
+          tags: diskquota:gp${{ matrix.gp_version }}
+          build-args: |
+            GP_MAJORVERSION=${{ matrix.gp_version }}
+            OS_VERSION=${{ matrix.target_os_version }}
+
+      - name: Extract artifacts
+        run: |
+          mkdir artifacts
+          docker create --name temp-container diskquota:gp${{ matrix.gp_version }}
+          docker cp temp-container:/diskquota/Package artifacts/
+          docker rm temp-container
+
+      - name: Upload deb packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: deb-packages-diskquota${{ matrix.gp_version }}-${{ matrix.target_os }}${{ matrix.target_os_version }}
+          path: artifacts/Package/
+
+      - name: Test deb package installation
+        uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
+        with:
+          test_docker: 'ubuntu:${{ matrix.target_os_version }}'
+          artifact_name: 'deb-packages-diskquota${{ matrix.gp_version }}-${{ matrix.target_os }}${{ matrix.target_os_version }}'
+          add_greengage_repo: true
+          greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
+          verify_commands: dpkg -l diskquota*

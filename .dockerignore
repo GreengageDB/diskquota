@@ -1,0 +1,17 @@
+# For the ci/Dockerfile.ubuntu deb build
+
+# Local build directories
+build*/
+results/
+
+# IDE/Editors
+.vscode/
+.idea/
+tags
+cscope*
+.ccls-cache/
+compile_commands.json
+
+# Docker files themselves
+Dockerfile*
+.dockerignore
