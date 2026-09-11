@@ -55,7 +55,7 @@ jobs:
       - name: Upload deb packages
         uses: actions/upload-artifact@v7
         with:
-          name: deb-packages-diskquota${{ matrix.gp_version }}-${{ matrix.target_os }}${{ matrix.target_os_version }}
+          name: deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
           path: artifacts/Package/
 
       - name: Test deb package installation
@@ -65,4 +65,4 @@ jobs:
           artifact_name: 'deb-packages-diskquota${{ matrix.gp_version }}-${{ matrix.target_os }}${{ matrix.target_os_version }}'
           add_greengage_repo: true
           greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
-          verify_commands: dpkg -l diskquota*
+          verify_commands: dpkg -l greengage${{ matrix.gp_version }}-diskquota

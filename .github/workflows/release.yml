@@ -13,10 +13,17 @@ jobs:
         include:
         - target_os: ubuntu
           target_os_version: 22.04
-          extensions:  deb ddeb
+          gp_version: 6
+          extensions:  deb
         - target_os: ubuntu
           target_os_version: 24.04
-          extensions:  deb ddeb
+          gp_version: 6
+          extensions:  deb
+        - target_os: ubuntu
+          target_os_version: 22.04
+          gp_version: 7
+          extensions:  deb
+
     runs-on: ubuntu-24.04
     permissions:
       contents: write
@@ -29,4 +36,4 @@ jobs:
           target_os:            ${{ matrix.target_os }}
           target_os_version:    ${{ matrix.target_os_version }}
           extensions:           ${{ matrix.extensions }}
-          artifact_prefix:      deb-packages-diskquota6
+          artifact_prefix:      deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
