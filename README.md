@@ -116,9 +116,9 @@ make install
 
 `cpack`'s DEB generator is used (requires `dpkg-dev` for `dpkg-shlibdeps`).
 The package name and its dependency on Greengage are derived from the GPDB
-major version the extension was configured against (`diskquota6`, `diskquota7`,
-...), so build once per GPDB major version, pointing `PG_CONFIG` at that
-version's installation:
+major version the extension was configured against (`greengage6-diskquota`,
+`greengage7-diskquota`, ...), so build once per GPDB major version,
+pointing `PG_CONFIG` at that version's installation:
 
 ```
 mkdir -p build && cd build

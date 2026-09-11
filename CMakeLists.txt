@@ -179,8 +179,8 @@ set(DISKQUOTA_PACKAGE_PREFIX "/opt/greengagedb/greengage${GP_MAJOR_VERSION}" CAC
     "Installation prefix baked into the DEB/RPM package, independent of CMAKE_INSTALL_PREFIX")
 set(CPACK_PACKAGING_INSTALL_PREFIX "${DISKQUOTA_PACKAGE_PREFIX}")
 
-# DEB packaging. The package is versioned per-GP-major-version (diskquota6,
-# diskquota7, ...) since the .so is compiled against a specific GPDB's
+# DEB packaging. The package is versioned per-GP-major-version (greengage6-diskquota,
+# greengage7-diskquota, ...) since the .so is compiled against a specific GPDB's
 # headers/libpq and is installed under that GPDB's own GPHOME.
 set(CPACK_DEBIAN_PACKAGE_NAME "greengage${GP_MAJOR_VERSION}-diskquota")
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
