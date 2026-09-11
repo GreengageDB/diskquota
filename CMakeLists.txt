@@ -182,12 +182,12 @@ set(CPACK_PACKAGING_INSTALL_PREFIX "${DISKQUOTA_PACKAGE_PREFIX}")
 # DEB packaging. The package is versioned per-GP-major-version (diskquota6,
 # diskquota7, ...) since the .so is compiled against a specific GPDB's
 # headers/libpq and is installed under that GPDB's own GPHOME.
-set(CPACK_DEBIAN_PACKAGE_NAME "diskquota${GP_MAJOR_VERSION}")
+set(CPACK_DEBIAN_PACKAGE_NAME "greengage${GP_MAJOR_VERSION}-diskquota")
 set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Greengage <greengage@greengagedb.org>")
 set(CPACK_DEBIAN_PACKAGE_SECTION "database")
 set(CPACK_DEBIAN_PACKAGE_DEPENDS "greengage${GP_MAJOR_VERSION}")
-set(CPACK_DEBIAN_PACKAGE_PROVIDES "diskquota")
+set(CPACK_DEBIAN_PACKAGE_PROVIDES "diskquota, diskquota${GP_MAJOR_VERSION}")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
     "Diskquota extension for Greengage ${GP_MAJOR_VERSION}
