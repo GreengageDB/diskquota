@@ -62,7 +62,7 @@ jobs:
         uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
         with:
           test_docker: 'ubuntu:${{ matrix.target_os_version }}'
-          artifact_name: 'deb-packages-diskquota${{ matrix.gp_version }}-${{ matrix.target_os }}${{ matrix.target_os_version }}'
+          artifact_name: 'deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}'
           add_greengage_repo: true
           greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
           verify_commands: dpkg -l greengage${{ matrix.gp_version }}-diskquota
