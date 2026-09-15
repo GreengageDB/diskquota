@@ -16,9 +16,6 @@ export DEB_BUILD_OPTIONS = nocheck
 %:
 	dh $@ --buildsystem=cmake
 
-# override_dh_auto_clean:
-# 	@echo "Skipping clean"
-
 override_dh_auto_configure:
 	@test -x "$(PG_CONFIG)" || { echo "pg_config not found or not executable at $(PG_CONFIG)"; exit 1; }
 	@echo "=== GP$(GP_MAJORVERSION) ==="
