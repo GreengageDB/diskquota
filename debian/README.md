@@ -39,7 +39,7 @@ debian/control  (generated from debian/control.in,
                   substituting @GP_MAJORVERSION@)
                     ↓
 debian/changelog (single entry; package name/maintainer
-                   read back from the just-generated debian/control)
+                   read from debian/control.in)
                     ↓
 debuild --preserve-env -us -uc -b
    (PG_HOME, GP_MAJORVERSION exported explicitly)
@@ -59,7 +59,7 @@ dh_install (filters debian/tmp through debian/install)
                     ↓
 dh_strip → .ddeb, dh_installchangelogs, dh_lintian, dh_builddeb
                     ↓
-find + mv → ./Package/*.deb, *.ddeb, *.buildinfo, *.changes
+find + mv → ./Package/*.deb, *.ddeb, *.build, *.buildinfo, *.changes
 ```
 
 ## package.mk Targets
@@ -76,15 +76,28 @@ find + mv → ./Package/*.deb, *.ddeb, *.buildinfo, *.changes
 | Target | Description |
 | --- | --- |
 | `debian/control` | Generated from `debian/control.in`, substituting `@GP_MAJORVERSION@` |
-| `changelog` / `debian/changelog` | Generates a single-entry changelog from `version-vars` plus the package name/maintainer read out of the freshly generated `debian/control` |
+| `changelog` / `debian/changelog` | Generates a single-entry changelog from `version-vars` plus the package name/maintainer read out of `debian/control.in` |
 
 ### Packaging
 
 | Target | Description |
 | --- | --- |
-| `pkg` / `pkg-deb` | Alias for `pkg-deb-all` |
-| `pkg-deb-all` | Builds the binary package: `debuild --preserve-env -us -uc -b` (binary-only, unsigned), scoped via `DH_OPTIONS="-p greengage$(GP_MAJORVERSION)-diskquota"` |
-| `_collect-artifacts` (inline in `pkg-deb`) | Moves `*.deb`, `*.ddeb`, `*.build`, `*.buildinfo`, `*.changes` from the parent directory into `$(ARTIFACTS_DIR)` (`./Package`) |
+| `pkg` | Alias for `pkg-deb` — the entry point used by `ci/build_in_docker.sh` |
+| `pkg-deb` | Depends on `debian/changelog` and `debian/control`. Runs `debuild --preserve-env -us -uc -b` (binary-only, unsigned), scoped via `DH_OPTIONS="-p greengage$(GP_MAJORVERSION)-diskquota"` with `PG_HOME`/`GP_MAJORVERSION` exported into the debuild environment; then moves `*.deb`, `*.ddeb`, `*.build`, `*.buildinfo`, `*.changes` from the parent directory into `$(ARTIFACTS_DIR)` (`./Package`) in the same recipe |
+
+`MAINTAINER` and `PACKAGE_SOURCE` (used to build `debian/changelog` and
+the `PACKAGE_DEBIAN` package name) are read via `grep`/`awk` from
+**`debian/control.in`** (the template), not from the generated
+`debian/control` — this works because neither field contains
+`@GP_MAJORVERSION@`, so the values are identical in both files.
+
+`debian/control` and `debian/changelog` are declared `.PHONY` in
+`package.mk`, so they are regenerated on every `make -f package.mk pkg`
+invocation regardless of file timestamps. This matters because their
+content depends on the `GP_MAJORVERSION` environment variable, not on
+`debian/control.in`'s mtime — without `.PHONY`, rebuilding a different
+`GP_MAJORVERSION` in the same working directory right after another build
+would silently reuse the stale `debian/control` from the previous run.
 
 ## debian/rules
 
@@ -172,9 +185,12 @@ make -f package.mk version-info  # inspect metadata without building
 
 ### Notes
 
-- `debian/control`, `debian/changelog`, `debian/install`, and
-  `debian/not-installed` are **generated**; they are in `.gitignore` and
-  should not be committed.
+- `debian/control` and `debian/changelog` are **generated on every
+  build** (declared `.PHONY` in `package.mk`, see above) from
+  `debian/control.in` and the current `GP_MAJORVERSION`/`VERSION`.
+  `debian/install` and `debian/not-installed` are generated at configure
+  time from their `.in` templates. All four are `.gitignore`d and should
+  not be committed.
 - `cmake --install` runs against `debian/tmp`, and `dh_install` filters
   that directory through `debian/install`. Anything present in
   `debian/tmp` but not matched by either `debian/install` or

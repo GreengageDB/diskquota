@@ -114,44 +114,34 @@ make install
 
 ## Building a DEB package
 
-`cpack`'s DEB generator is used (requires `dpkg-dev` for `dpkg-shlibdeps`).
-The package name and its dependency on Greengage are derived from the GPDB
-major version the extension was configured against (`greengage6-diskquota`,
-`greengage7-diskquota`, ...), so build once per GPDB major version,
-pointing `PG_CONFIG` at that version's installation:
+`.deb` packages are built per GPDB major version using debhelper
+(`debian/`, `package.mk`), not `cpack`. See
+[debian/README.md](debian/README.md) for the full packaging reference
+(environment variables, generated files, build flow).
+
+Local build in a container (recommended — no need to install the
+Greengage build toolchain on the host):
 
 ```
-mkdir -p build && cd build
-cmake .. -DPG_CONFIG=<gp6_installation_dir>/bin/pg_config -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target package_deb
+GP_MAJORVERSION=6 ci/build_in_docker_local.sh
 ```
 
-```
-mkdir -p build7 && cd build7
-cmake .. -DPG_CONFIG=<gp7_installation_dir>/bin/pg_config -DCMAKE_BUILD_TYPE=Release
-cmake --build . --target package_deb
-```
-
-Each run produces a `diskquota<major>_<version>_<arch>.deb` in the build
-directory.
-
-CI builds the GP6 package in Docker via `ci/Dockerfile.ubuntu`
-(`.github/workflows/build_and_package.yml`). Greengage itself is installed
-from the `greengagedb.org` apt repository inside the image (same source
-`pxf/ci/build_in_docker.sh` uses), not baked into a base image:
+Local build on a host with Greengage already installed:
 
 ```
-docker build -f ci/Dockerfile.ubuntu --build-arg GP_MAJORVERSION=6 -t diskquota:gp6 .
-docker create --name tmp diskquota:gp6
-docker cp tmp:/diskquota/Package ./Package
-docker rm tmp
+export GP_MAJORVERSION=6
+export PG_HOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
+
+make -f package.mk pkg
 ```
 
-GP7 isn't built by this workflow yet: the `greengagedb.org` apt repo only
-publishes `greengage6` for Ubuntu 22.04/24.04 so far. Once `greengage7` is
-published there, add `7` back to the `gp_version` matrix in
-`build_and_package.yml` — `ci/Dockerfile.ubuntu` and `CMakeLists.txt` already
-support it via `--build-arg GP_MAJORVERSION=7` without further changes.
+Repeat with `GP_MAJORVERSION=7` for the GP7 package. Resulting
+`.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
+
+CI builds GP6 (Ubuntu 22.04, 24.04) and GP7 (Ubuntu 22.04) via
+`.github/workflows/build_and_package.yml`, running the same
+`ci/build_in_docker.sh` inside the matching Greengage developer image
+(`ghcr.io/greengagedb/greengage/ggdb<version>_<os>`).
 
 2. Create database to store global information.
 ```
@@ -357,4 +347,3 @@ If rejectmap shared memory is full, it's possible to load data into some
 schemas or roles which quota limit are reached.
 If active table shared memory is full, disk quota worker may failed to detect
 the corresponding disk usage change in time.
-
