@@ -51,7 +51,7 @@ echo -n "Installing packages via apt... "
   apt-get -yq update
   apt-get -yq install --no-install-recommends "$GREENGAGE_PACKAGE"
   apt-get clean
-} # 1>/dev/null ; echo "Done"
+} 1>/dev/null ; echo "Done"
 
 # GreengageDB environment variables
 export PYTHONPATH="$PG_HOME/lib/python"
