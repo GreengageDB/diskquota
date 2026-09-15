@@ -53,17 +53,6 @@ echo -n "Installing packages via apt... "
   apt-get clean
 } 1>/dev/null ; echo "Done"
 
-# GreengageDB environment variables
-export PYTHONPATH="$PG_HOME/lib/python"
-export LD_LIBRARY_PATH="$PG_HOME/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
-
-# shellcheck disable=SC1091 # External source
-source "$PG_HOME/greengage_path.sh"
-
-if [ -e "$PG_HOME/etc/openssl.cnf" ]; then
-	export OPENSSL_CONF="$PG_HOME/etc/openssl.cnf"
-fi
-
 # Package
 make -f package.mk pkg
 
