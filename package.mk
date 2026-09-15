@@ -64,4 +64,4 @@ pkg-deb: $(DEB_PREREQS)
 	                                        -o -name "*.changes" \) \
 	                                        -exec mv -f {} $(ARTIFACTS_DIR)/ \;
 
-.PHONY: pkg pkg-deb changelog version-vars version-info version VERSION
+.PHONY: pkg pkg-deb changelog debian/changelog debian/control version-vars version-info version VERSION

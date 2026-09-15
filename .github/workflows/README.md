@@ -1,11 +1,11 @@
 # CI Workflows
 
-## check.yml
+## Check ([check.yml](check.yml))
 
 Builds and runs the regression/isolation2 test suite against `ggdb6` and
 `ggdb7` directly in the GPDB container image (no Docker build step).
 
-## build_and_package.yml
+## Build and Package DEB ([build_and_package.yml](build_and_package.yml))
 
 Builds `diskquota` and packages it as a `.deb`/`.ddeb`.
 
@@ -45,7 +45,7 @@ Builds `diskquota` and packages it as a `.deb`/`.ddeb`.
 | `push` | `master`, tags |
 | `pull_request` | all branches |
 
-## greengage-release.yml
+## GreengageDB diskquota Release ([release.yml](release.yml))
 
 Uploads previously built `.deb`/`.ddeb` packages to a GitHub Release.
 

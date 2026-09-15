@@ -1,4 +1,4 @@
-# .github/workflows/greengage-release.yml
+# .github/workflows/release.yml
 name: GreengageDB diskquota Release
 
 on:
