@@ -28,41 +28,43 @@ jobs:
             target_os_version: 22.04
             gp_version: 7
     runs-on: ubuntu-24.04
+    env:
+      GGDB_IMAGE:   ghcr.io/greengagedb/greengage/ggdb${{ matrix.gp_version}}_${{ matrix.target_os}}${{ matrix.target_os_version != '22.04' && matrix.target_os_version || '' }}:latest
+      DEB_PACKAGES: deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
+
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v6
+      - name: Build in Docker using docker run
+        env:
+          PG_HOME: /opt/greengagedb/greengage${{ matrix.gp_version }}
+          SRC: /home/gpadmin/diskquota
+          PATH: /opt/greengagedb/greengage${{ matrix.gp_version }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+          GP_MAJORVERSION: ${{ matrix.gp_version }}
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: ci/Dockerfile.ubuntu
-          push: false
-          tags: diskquota:gp${{ matrix.gp_version }}
-          build-args: |
-            GP_MAJORVERSION=${{ matrix.gp_version }}
-            OS_VERSION=${{ matrix.target_os_version }}
-
-      - name: Extract artifacts
         run: |
-          mkdir artifacts
-          docker create --name temp-container diskquota:gp${{ matrix.gp_version }}
-          docker cp temp-container:/diskquota/Package artifacts/
-          docker rm temp-container
+          set -eux
+          docker run \
+            --rm \
+            -v ${{ github.workspace }}:$SRC \
+            -w $SRC \
+            -e PG_HOME \
+            -e SRC \
+            -e PATH \
+            -e GP_MAJORVERSION \
+            $GGDB_IMAGE \
+            /bin/bash ci/build_in_docker.sh
+
+          mv Package $DEB_PACKAGES
 
       - name: Upload deb packages
         uses: actions/upload-artifact@v7
         with:
-          name: deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
-          path: artifacts/Package/
+          name: ${{ env.DEB_PACKAGES }}
+          path: ${{ env.DEB_PACKAGES }}
 
-      - name: Test deb package installation
+      - name: Test install deb-packages in Docker 
         uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
         with:
-          test_docker: 'ubuntu:${{ matrix.target_os_version }}'
-          artifact_name: 'deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}'
-          add_greengage_repo: true
-          greengage_repo_url: "https://storage.yandexcloud.net/greengage-repo"
+          test_docker: ${{ matrix.target_os}}:${{ matrix.target_os_version }}
+          artifact_name: ${{ env.DEB_PACKAGES }}
           verify_commands: dpkg -l greengage${{ matrix.gp_version }}-diskquota

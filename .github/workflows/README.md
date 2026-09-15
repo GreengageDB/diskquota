@@ -7,35 +7,58 @@ Builds and runs the regression/isolation2 test suite against `ggdb6` and
 
 ## build_and_package.yml
 
-Builds `diskquota` and packages it as a `.deb`.
+Builds `diskquota` and packages it as a `.deb`/`.ddeb`.
 
 ### What it does
 
-1. **Build Docker image** — builds `ci/Dockerfile.ubuntu` with
-   `--build-arg GP_MAJORVERSION=<version>`. Inside the image, Greengage is
-   installed from the `greengagedb.org` apt repository (same source
-   `pxf/ci/build_in_docker.sh` uses), then the extension is compiled against
-   it and packaged via `cmake --build . --target package_deb` (CPack DEB
-   generator, see [CMakeLists.txt](../../CMakeLists.txt))
-2. **Extract artifacts** — copies `Package/` out of the built image
-3. **Upload artifacts** — uploads the `.deb` as a GitHub Actions artifact
+1. **Build in Docker** — runs `ci/build_in_docker.sh` inside the matching
+   Greengage developer image
+   (`ghcr.io/greengagedb/greengage/ggdb<version>_<os>`, see
+   [ci/build_in_docker.sh](../../ci/build_in_docker.sh)), which already
+   provides the build toolchain. The script installs the matching Greengage
+   runtime package via apt, builds the extension against it, and packages
+   it with `make -f package.mk pkg` (see [package.mk](../../package.mk))
+2. **Rename artifacts** — moves the resulting `Package/` directory to
+   `deb-packages-greengage<gp_version>-diskquota-<os><version>`
+3. **Upload artifacts** — uploads `.deb`/`.ddeb` as a GitHub Actions artifact
+4. **Test install** — installs the package into a clean `<os>:<version>`
+   image via the shared
+   [`tests/install/deb`](https://github.com/greengagedb/greengage-ci) action
+   and verifies it with `dpkg -l greengage<gp_version>-diskquota`
 
 ### GP versions built
 
-Only `gp_version: 6` right now — the `greengagedb.org` apt repo doesn't
-publish a `greengage7` package for Ubuntu 22.04/24.04 yet. Once it does, add
-`7` back to the matrix; `ci/Dockerfile.ubuntu` and `CMakeLists.txt` already
-support it.
+`gp_version: 6` (Ubuntu 22.04, 24.04) and `gp_version: 7` (Ubuntu 22.04).
 
 ### Artifacts
 
-| Name                    | Contents                          |
-| ------------------------ | ---------------------------------- |
-| `diskquota-deb-gp6`      | `diskquota6_<version>_<arch>.deb`  |
+| Name | Contents |
+| ---- | -------- |
+| `deb-packages-greengage6-diskquota-ubuntu22.04` | `.deb`/`.ddeb` for GP6 / Ubuntu 22.04 |
+| `deb-packages-greengage6-diskquota-ubuntu24.04` | `.deb`/`.ddeb` for GP6 / Ubuntu 24.04 |
+| `deb-packages-greengage7-diskquota-ubuntu22.04` | `.deb`/`.ddeb` for GP7 / Ubuntu 22.04 |
 
 ### Triggers
 
-| Event          | Branches / refs      |
-| -------------- | --------------------- |
-| `push`         | `master`, tags        |
-| `pull_request` | all branches          |
+| Event | Branches / refs |
+| ----- | --------------- |
+| `push` | `master`, tags |
+| `pull_request` | all branches |
+
+## greengage-release.yml
+
+Uploads previously built `.deb`/`.ddeb` packages to a GitHub Release.
+
+### What it does
+
+Waits for `build_and_package.yml` to finish for the matching
+`target_os` / `target_os_version` / `gp_version`, then attaches its
+artifacts (`deb`, `ddeb`) to the release via the shared
+[`upload-pkgs-to-release`](https://github.com/greengagedb/greengage-ci)
+action.
+
+### Triggers
+
+| Event | Condition |
+| ----- | --------- |
+| `release` | `types: [released]` |

@@ -1,0 +1,17 @@
+Source: diskquota
+Maintainer: Greengage <greengage@greengagedb.org>
+Section: database
+Build-Depends: debhelper (>= 13),
+	 lsb-release,
+	 greengage@GP_MAJORVERSION@
+
+Package: greengage@GP_MAJORVERSION@-diskquota
+Priority: optional
+Architecture: amd64
+Depends: ${shlibs:Depends},
+	 greengage@GP_MAJORVERSION@
+Provides: diskquota, diskquota@GP_MAJORVERSION@
+Description: Diskquota extension for Greengage@GP_MAJORVERSION@
+	Diskquota is an extension that provides disk usage enforcement for
+	database objects in Greengage DB. It supports setting quota limits on
+	schemas and roles and limiting the amount of disk space they can use.

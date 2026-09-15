@@ -14,15 +14,15 @@ jobs:
         - target_os: ubuntu
           target_os_version: 22.04
           gp_version: 6
-          extensions:  deb
+          extensions:  deb ddeb
         - target_os: ubuntu
           target_os_version: 24.04
           gp_version: 6
-          extensions:  deb
+          extensions:  deb ddeb
         - target_os: ubuntu
           target_os_version: 22.04
           gp_version: 7
-          extensions:  deb
+          extensions:  deb ddeb
 
     runs-on: ubuntu-24.04
     permissions:
