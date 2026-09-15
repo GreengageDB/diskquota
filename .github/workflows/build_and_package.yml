@@ -21,18 +21,15 @@ jobs:
           - target_os: ubuntu
             target_os_version: 22.04
             gp_version: 6
-            tag: CI-6293
           - target_os: ubuntu
             target_os_version: 24.04
             gp_version: 6
-            tag: CI-6293
           - target_os: ubuntu
             target_os_version: 22.04
             gp_version: 7
-            tag: CI-6301
     runs-on: ubuntu-24.04
     env:
-      GGDB_IMAGE:   ghcr.io/greengagedb/greengage/ggdb${{ matrix.gp_version}}_${{ matrix.target_os}}${{ matrix.target_os_version != '22.04' && matrix.target_os_version || '' }}:${{ matrix.tag || 'latest' }}
+      GGDB_IMAGE:   ghcr.io/greengagedb/greengage/ggdb${{ matrix.gp_version}}_${{ matrix.target_os}}${{ matrix.target_os_version != '22.04' && matrix.target_os_version || '' }}:latest
       DEB_PACKAGES: deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
 
     steps:
