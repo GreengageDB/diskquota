@@ -3,7 +3,7 @@ name: Build and Package DEB
 
 on:
   push:
-    branches: ['master']
+    branches: ['main']
     tags: ['**']
   pull_request:
     branches: ['**']
