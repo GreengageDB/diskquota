@@ -14,12 +14,24 @@ docker run --rm -it -v .:/home/gpadmin/diskquota ghcr.io/greengagedb/greengage/g
 
 ## Build package
 
-6X:
-```bash
-GP_MAJORVERSION=6 ci/build_in_docker_local.sh
-```
+6X (default):
+
+- Ubuntu 22.04 (default)
+
+    ```bash
+    ci/build_in_docker_local.sh
+    ```
+
+- Ubuntu 24.04:
+
+    ```bash
+    ci/build_in_docker_local.sh 6 24.04
+    ```
 
 7X:
-```bash
-GP_MAJORVERSION=7 ci/build_in_docker_local.sh
-```
+
+- Ubuntu 22.04 (dxefault):
+
+    ```bash
+    ci/build_in_docker_local.sh 7
+    ```
