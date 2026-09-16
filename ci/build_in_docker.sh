@@ -85,7 +85,7 @@ if [[ "$(id -u)" -eq 0 ]]; then
     prepare_build_user
     if [[ -n "$BUILD_USER" ]]; then
         chown "$BUILD_USER" ..
-        sudo --preserve-env=GP_MAJORVERSION,PG_HOME \
+        sudo --preserve-env=GP_MAJORVERSION,PG_HOME,DISKQUOTA_PACKAGE_VERSION \
              --user "$BUILD_USER" -- \
             make -f package.mk
         exit
