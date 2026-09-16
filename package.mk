@@ -1,60 +1,102 @@
 #!/usr/bin/make -f
 # package.mk
 #---------------------------------------------------------------------
-# Packaging targets with changelog options
+# Packaging targets with changelog generation
 #---------------------------------------------------------------------
 
 SHELL := /bin/bash
 
-# Metadata vars
-DATE_RFC	   := $(shell date -R)
+.DEFAULT_GOAL := pkg
+
+# Require an explicit version for package-producing goals.
+# Other goals may use the default for local convenience.
+GP_MAJORVERSION_DEFAULT := 6
+PACKAGING_GOALS         := pkg pkg-deb debian/control debian/changelog
+
+ifeq ($(origin GP_MAJORVERSION),undefined)
+ifneq (,$(filter $(PACKAGING_GOALS),$(or $(MAKECMDGOALS),$(.DEFAULT_GOAL))))
+$(error GP_MAJORVERSION is not set (e.g. GP_MAJORVERSION=6); required to build a package)
+else
+$(warning GP_MAJORVERSION is not set; defaulting to $(GP_MAJORVERSION_DEFAULT) for \
+	'$(or $(MAKECMDGOALS),$(.DEFAULT_GOAL))' - pass GP_MAJORVERSION=<N> explicitly \
+	to target a different Greengage major version)
+endif
+endif
+GP_MAJORVERSION ?= $(GP_MAJORVERSION_DEFAULT)
+
+#---------------------------------------------------------------------
+# Metadata
+#---------------------------------------------------------------------
+
+DATE_RFC       := $(shell date -R)
+DISTRO_CODENAME:= $(shell lsb_release -sc)
 ARTIFACTS_DIR  := $(CURDIR)/./Package
+
 MAINTAINER     := $(shell grep '^Maintainer:' debian/control.in | sed 's/Maintainer: //')
 PACKAGE_SOURCE := $(shell grep '^Source:' debian/control.in | awk '{print $$2}')
 PACKAGE_DEBIAN := greengage$(GP_MAJORVERSION)-$(PACKAGE_SOURCE)
 
-VERSION :
-	@cat $@
+# Resolve the package version from an explicit override, git, or .version.
+RAW_VERSION := $(or $(DISKQUOTA_PACKAGE_VERSION),\
+                     $(shell git describe --tags 2>/dev/null),\
+                     $(shell grep -v '$$Format:' .version 2>/dev/null))
 
-version: VERSION
+ifeq ($(strip $(RAW_VERSION)),)
+$(warning No version resolved from DISKQUOTA_PACKAGE_VERSION, git, or .version; \
+using 0.0.0+unknown - this package should not be released)
+RAW_VERSION := 0.0.0+unknown
+endif
 
-version-vars: version
-	$(eval FULL_VERSION    := $(shell perl -pe 's, ,-,g' ./VERSION))
-	$(eval PACKAGE_VERSION := $(shell perl -pe 's, .*,,g; s/-SNAPSHOT/~snapshot/' ./VERSION))
-	$(eval DISTRO_CODENAME := $(shell lsb_release -sc))
-	$(eval IS_RELEASE      := $(if $(findstring ~snapshot,$(PACKAGE_VERSION)),no,yes))
-	$(eval BUILD_TYPE      := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build))
+# Convert git describe versions to valid Debian versions.
+# Matches <version>-<commits>-<hash> and converts it to
+# <version>+dev.<commits>.<hash>.
+PACKAGE_VERSION := $(shell printf '%s' '$(RAW_VERSION)' | \
+                     perl -pe 's/^(.*)-([0-9]+)-(g[0-9a-f]+)$$/\1+dev.\2.\3/')
 
-version-info : version-vars
+IS_RELEASE  := $(if $(findstring +dev,$(PACKAGE_VERSION)),no,yes)
+BUILD_TYPE  := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build)
+
+DEB_PREREQS := debian/control debian/changelog
+DEBUILD_ENV := PG_HOME="$(PG_HOME)" GP_MAJORVERSION="$(GP_MAJORVERSION)"
+DEBUILD_CMD := debuild --preserve-env -us -uc -b
+
+#---------------------------------------------------------------------
+# Diagnostics
+#---------------------------------------------------------------------
+
+version-info:
 	@echo "PACKAGE_VERSION: $(PACKAGE_VERSION)"
-	@echo "FULL_VERSION: $(FULL_VERSION)"
+	@echo "PACKAGE_DEBIAN:  $(PACKAGE_DEBIAN)"
 	@echo "DISTRO_CODENAME: $(DISTRO_CODENAME)"
-	@echo "IS_RELEASE: $(IS_RELEASE)"
-	@echo "BUILD_TYPE: $(BUILD_TYPE)"
+	@echo "IS_RELEASE:      $(IS_RELEASE)"
+	@echo "BUILD_TYPE:      $(BUILD_TYPE)"
 
-# Generate control file
+#---------------------------------------------------------------------
+# Control file / changelog generation
+#---------------------------------------------------------------------
+
+# Regenerate files because their contents depend on environment/git state.
 debian/control: debian/control.in
 	@echo "=== Generating debian/control for GP$(GP_MAJORVERSION) ==="
 	sed 's|@GP_MAJORVERSION@|$(GP_MAJORVERSION)|g' $< > $@
 
-# Generate package control files
-changelog : debian/changelog
-debian/changelog: version-vars debian/control
+changelog: debian/changelog
+
+debian/changelog: debian/control
 	@echo "$(PACKAGE_SOURCE) ($(PACKAGE_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
 	@echo "" >> $@
 	@echo "  * $(BUILD_TYPE)" >> $@
 	@echo "" >> $@
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
 
-DEB_PREREQS := debian/changelog debian/control
-DEBUILD_ENV := PG_HOME="$(PG_HOME)" GP_MAJORVERSION="$(GP_MAJORVERSION)"
-DEBUILD_CMD := debuild --preserve-env -us -uc -b
+#---------------------------------------------------------------------
+# Packaging
+#---------------------------------------------------------------------
 
-# Default packaging target
-pkg : pkg-deb
+pkg: pkg-deb
 
 pkg-deb: $(DEB_PREREQS)
-	@echo "Building diskquota package"
+	@echo "Building $(PACKAGE_DEBIAN) $(PACKAGE_VERSION)"
 	@$(DEBUILD_ENV) DH_OPTIONS="-p $(PACKAGE_DEBIAN)" $(DEBUILD_CMD)
 	@mkdir -p $(ARTIFACTS_DIR)
 	@find $(CURDIR)/../ -maxdepth 1 -type f \( -name "*.deb" \
@@ -64,4 +106,4 @@ pkg-deb: $(DEB_PREREQS)
 	                                        -o -name "*.changes" \) \
 	                                        -exec mv -f {} $(ARTIFACTS_DIR)/ \;
 
-.PHONY: pkg pkg-deb changelog debian/changelog debian/control version-vars version-info version VERSION
+.PHONY: pkg pkg-deb changelog debian/changelog debian/control version-info
