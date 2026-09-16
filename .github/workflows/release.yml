@@ -12,15 +12,15 @@ jobs:
       matrix:
         include:
         - target_os: ubuntu
-          target_os_version: 22.04
+          target_os_version: '22.04'
           gp_version: 6
           extensions:  deb ddeb
         - target_os: ubuntu
-          target_os_version: 24.04
+          target_os_version: '24.04'
           gp_version: 6
           extensions:  deb ddeb
         - target_os: ubuntu
-          target_os_version: 22.04
+          target_os_version: '22.04'
           gp_version: 7
           extensions:  deb ddeb
 
