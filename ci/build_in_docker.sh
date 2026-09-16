@@ -41,9 +41,6 @@ export GREENGAGE_PACKAGE=${GREENGAGE_PACKAGE:-greengage$GP_MAJORVERSION}
 # Configure
 git config --system --add safe.directory "$(pwd)"
 
-update-locale LANG=en_US.UTF-8
-localedef -c -i ru_RU -f CP1251 ru_RU.CP1251
-
 # Install packages from apt
 echo -n "Installing packages via apt... "
 {
