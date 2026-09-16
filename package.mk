@@ -54,7 +54,7 @@ DEBUILD_CMD := debuild --preserve-env -us -uc -b
 pkg : pkg-deb
 
 pkg-deb: $(DEB_PREREQS)
-	@echo "Building diskquta package"
+	@echo "Building diskquota package"
 	@$(DEBUILD_ENV) DH_OPTIONS="-p $(PACKAGE_DEBIAN)" $(DEBUILD_CMD)
 	@mkdir -p $(ARTIFACTS_DIR)
 	@find $(CURDIR)/../ -maxdepth 1 -type f \( -name "*.deb" \
