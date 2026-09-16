@@ -38,24 +38,13 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
       - name: Build in Docker using docker run
-        env:
-          PG_HOME: /opt/greengagedb/greengage${{ matrix.gp_version }}
-          SRC: /home/gpadmin/diskquota
-          PATH: /opt/greengagedb/greengage${{ matrix.gp_version }}/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-          GP_MAJORVERSION: ${{ matrix.gp_version }}
-
         run: |
           set -eux
           docker run \
             --rm \
-            -v ${{ github.workspace }}:$SRC \
-            -w $SRC \
-            -e PG_HOME \
-            -e SRC \
-            -e PATH \
-            -e GP_MAJORVERSION \
+            -v ${{ github.workspace }}:/diskquota/src -w /diskquota/src \
             $GGDB_IMAGE \
-            /bin/bash ci/build_in_docker.sh
+            ci/build_in_docker.sh
 
           mv Package $DEB_PACKAGES
 
