@@ -42,7 +42,7 @@ Builds `diskquota` and packages it as a `.deb`/`.ddeb`.
 
 | Event | Branches / refs |
 | ----- | --------------- |
-| `push` | `master`, tags |
+| `push` | `main`, tags |
 | `pull_request` | all branches |
 
 ## GreengageDB diskquota Release ([release.yml](release.yml))

@@ -3,9 +3,9 @@
 
 DH_VERBOSE = 1
 
-# CI passes GP_MAJORVERSION (docker build-arg / env). Fail early if missing.
+# GP_MAJORVERSION is required for package builds
 ifndef GP_MAJORVERSION
-$(error GP_MAJORVERSION is not set (expected e.g. GP_MAJORVERSION=6). CI passes it via docker build-arg / environment)
+$(error GP_MAJORVERSION is not set (expected e.g. GP_MAJORVERSION=6))
 endif
 
 PG_HOME   ?= /opt/greengagedb/greengage$(GP_MAJORVERSION)

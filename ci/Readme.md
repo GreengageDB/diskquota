@@ -30,7 +30,7 @@ docker run --rm -it -v .:/home/gpadmin/diskquota ghcr.io/greengagedb/greengage/g
 
 7X:
 
-- Ubuntu 22.04 (dxefault):
+- Ubuntu 22.04 (default):
 
     ```bash
     ci/build_in_docker_local.sh 7

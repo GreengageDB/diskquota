@@ -25,8 +25,8 @@ file names** without a package prefix: `debian/install`,
 | `PG_HOME` | `debian/rules` | No | `/opt/greengagedb/greengage$(GP_MAJORVERSION)` | Greengage install prefix; `CMAKE_INSTALL_PREFIX` for the build, base for `@PG_HOME_REL@` substitution |
 | `PG_CONFIG` | `debian/rules` (`test -x` hard check) | No | `$(PG_HOME)/bin/pg_config` | Used by CMake to resolve headers/libs |
 
-`ci/build_in_docker.sh` sets `PG_HOME` and `GP_MAJORVERSION` from the
-container environment and calls `make -f package.mk pkg`.
+`ci/build_in_docker.sh` determines `GP_MAJORVERSION` from the
+Greengage developer image and derives `PG_HOME` from it.
 
 ## Build Flow
 
@@ -161,15 +161,26 @@ Generated (do not commit, `.gitignore`d): `debian/control`,
 
 ### Local build in a container (recommended)
 
+The recommended way to build a package locally is to use the
+`ci/build_in_docker_local.sh` wrapper. It runs the build inside the
+matching Greengage developer image, so the Greengage build toolchain
+does not need to be installed on the host.
+
 ```bash
-GP_MAJORVERSION=6 ci/build_in_docker_local.sh
+ci/build_in_docker_local.sh
+````
+
+The default configuration is Greengage 6 on Ubuntu 22.04. Greengage and
+Ubuntu versions can be specified explicitly:
+
+```bash
+ci/build_in_docker_local.sh 6 24.04
+ci/build_in_docker_local.sh 7 22.04
 ```
 
-The wrapper pulls the matching Greengage developer image
-(`ghcr.io/greengagedb/greengage/ggdb${GP_MAJORVERSION}_ubuntu:latest`),
-bind-mounts the source tree, runs `ci/build_in_docker.sh` inside it, and
-chowns the result back to the host user — otherwise everything under the
-bind mount would end up owned by root.
+The build script determines the Greengage major version from the
+developer image and runs the package build as the owner of the mounted
+source tree when possible, avoiding root-owned build artifacts.
 
 Resulting `.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
 
@@ -179,9 +190,11 @@ Resulting `.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
 export GP_MAJORVERSION=6
 export PG_HOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
 
-make -f package.mk pkg           # build the .deb
-make -f package.mk version-info  # inspect metadata without building
+make -f package.mk pkg
+make -f package.mk version-info
 ```
+
+Use `GP_MAJORVERSION=7` to build the package for Greengage 7.
 
 ### Notes
 
