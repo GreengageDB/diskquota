@@ -8,8 +8,23 @@ ifndef GP_MAJORVERSION
 $(error GP_MAJORVERSION is not set (expected e.g. GP_MAJORVERSION=6))
 endif
 
-PG_HOME   ?= /opt/greengagedb/greengage$(GP_MAJORVERSION)
-PG_CONFIG ?= $(PG_HOME)/bin/pg_config
+# PG_HOME / PG_CONFIG: env value if non-empty, otherwise default.
+PG_HOME   := $(or $(strip $(PG_HOME)),/opt/greengagedb/greengage$(GP_MAJORVERSION))
+PG_CONFIG := $(or $(strip $(PG_CONFIG)),$(PG_HOME)/bin/pg_config)
+
+# Ask pg_config who it is. Empty output = not runnable or not Greengage.
+PG_CONFIG_MAJOR := $(shell $(PG_CONFIG) --gp_version 2>/dev/null \
+    | sed -n 's/^Greengage \([0-9][0-9]*\).*/\1/p')
+
+ifeq ($(strip $(PG_CONFIG_MAJOR)),)
+$(error $(PG_CONFIG) is not a usable Greengage pg_config \
+        (no "Greengage <major>" in --gp_version output))
+endif
+
+ifneq ($(PG_CONFIG_MAJOR),$(GP_MAJORVERSION))
+$(error $(PG_CONFIG) reports Greengage $(PG_CONFIG_MAJOR), \
+        but GP_MAJORVERSION=$(GP_MAJORVERSION))
+endif
 
 export DEB_BUILD_OPTIONS = nocheck
 
