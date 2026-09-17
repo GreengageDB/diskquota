@@ -112,65 +112,6 @@ Build and install:
 make install
 ```
 
-## Building a DEB package
-
-`.deb` packages are built per Greengage major version using debhelper
-(`debian/`, `package.mk`), not `cpack`. See
-[debian/README.md](debian/README.md) for the full packaging reference
-(environment variables, generated files, build flow).
-
-### Local build in a container
-
-The recommended way to build a package locally is to use the
-`ci/build_in_docker_local.sh` wrapper. It runs the build inside the
-matching Greengage developer image, so the Greengage build toolchain does
-not need to be installed on the host.
-
-```bash
-ci/build_in_docker_local.sh
-```
-
-The default configuration is Greengage 6 on Ubuntu 22.04. Greengage and
-Ubuntu versions can be specified explicitly:
-
-```bash
-ci/build_in_docker_local.sh 6 24.04
-ci/build_in_docker_local.sh 7 22.04
-```
-
-The build script determines the Greengage major version from the
-developer image and runs the package build as the owner of the mounted
-source tree when possible, avoiding root-owned build artifacts.
-
-### Local build on a host with Greengage already installed
-
-```bash
-export GP_MAJORVERSION=6
-export PG_HOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
-
-make -f package.mk pkg
-```
-
-Use `GP_MAJORVERSION=7` to build the package for Greengage 7.
-
-Resulting `.deb`/`.ddeb`/`.buildinfo`/`.changes` files are placed in
-`./Package/`.
-
-### CI
-
-CI builds packages for the following configurations:
-
-* Greengage 6 on Ubuntu 22.04
-* Greengage 6 on Ubuntu 24.04
-* Greengage 7 on Ubuntu 22.04
-
-The builds run `ci/build_in_docker.sh` inside the corresponding Greengage
-developer image. The resulting packages are uploaded as GitHub Actions
-artifacts and their installation is verified in a clean Ubuntu container.
-
-The release workflow attaches the built `.deb` and `.ddeb` packages to
-the corresponding GitHub Release.
-
 2. Create database to store global information.
 ```
 create database diskquota;
@@ -230,6 +171,37 @@ To skip formatting a certain piece of code:
 #endif
 /* clang-format on */
 ```
+
+## Building a DEB package
+
+`.deb` packages are built per GPDB major version using debhelper
+(`debian/`, `package.mk`), not `cpack`. See
+[debian/README.md](debian/README.md) for the full packaging reference
+(environment variables, generated files, build flow).
+
+Local build in a container (recommended — no need to install the
+Greengage build toolchain on the host):
+
+```
+GP_MAJORVERSION=6 ci/build_in_docker_local.sh
+```
+
+Local build on a host with Greengage already installed:
+
+```
+export GP_MAJORVERSION=6
+export PG_HOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
+
+make -f package.mk pkg
+```
+
+Repeat with `GP_MAJORVERSION=7` for the GP7 package. Resulting
+`.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
+
+CI builds GP6 (Ubuntu 22.04, 24.04) and GP7 (Ubuntu 22.04) via
+`.github/workflows/build_and_package.yml`, running the same
+`ci/build_in_docker.sh` inside the matching Greengage developer image
+(`ghcr.io/greengagedb/greengage/ggdb<version>_<os>`).
 
 # Usage
 1. Set/update/delete schema quota limit using diskquota.set_schema_quota
