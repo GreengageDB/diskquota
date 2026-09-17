@@ -15,28 +15,24 @@ is_container() {
 }
 
 prepare_build_user() {
-    local uid gid user group
+    local uid user
 
-    read -r uid gid < <(stat -c '%u %g' "$PWD")
+    read -r uid < <(stat -c '%u' "$PWD")
 
-    if [[ "$uid" -eq 0 && "$gid" -eq 0 ]]; then
+    if [[ "$uid" -eq 0 ]]; then
         echo "WARNING: $PWD is owned by root; build will run as root"
         return
     fi
 
     user=$(getent passwd "$uid" | cut -d: -f1 || true)
-    if [[ -z "$user" ]]; then
-        group=$(getent group "$gid" | cut -d: -f1 || true)
-
-        if [[ -z "$group" ]]; then
-            group=build
-            groupadd --gid "$gid" "$group"
-        fi
-
-        user=build
-        useradd --uid "$uid" --gid "$gid" \
-            --create-home --shell /bin/bash "$user"
+    if [[ -n "$user" ]]; then
+        BUILD_USER="$user"
+        return
     fi
+
+    user="build-$(od -An -N8 -tx1 /dev/urandom | tr -d ' \n')"
+    useradd --uid "$uid" --create-home --user-group \
+        --shell /bin/bash "$user"
 
     BUILD_USER="$user"
 }
