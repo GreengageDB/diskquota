@@ -2,16 +2,27 @@
 # FILE:    ci/build_in_docker.sh
 # CONTEXT: Build diskquota and package it as a .deb
 # PURPOSE: Runs inside a Greengage developer image, installs the matching
-#          Greengage package, and builds the diskquota .deb.
+#          Greengage package, and builds the diskquota deb-package.
 
 # shellcheck disable=SC2086
 
 set -eux
 
+# Expect the source tree to be bind-mounted from outside and used as the
+# working directory.
+# Check that $PWD is a mount point in /proc/self/mountinfo.
 is_container() {
-    [[ -f /.dockerenv || -f /run/.containerenv ]] ||
-        grep -qE '(docker|containerd|libpod|podman|kubepods)' \
-            /proc/1/cgroup 2>/dev/null
+    local mp
+    mp=$(pwd -P) || return 1
+
+    # mountinfo escapes space as \040 and backslash as \134.
+    mp=${mp//\\/\\134}
+    mp=${mp// /\\040}
+
+    MP="$mp" awk '
+        $5 == ENVIRON["MP"] { found = 1 }
+        END { exit !found }
+    ' /proc/self/mountinfo
 }
 
 prepare_build_user() {
