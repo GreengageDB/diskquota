@@ -70,7 +70,6 @@ echo -n "Installing packages via apt... "
     apt-get -yq update
     apt-get -yq install \
         --no-install-recommends "greengage$GP_MAJORVERSION"
-    apt-get clean
 } 1>/dev/null
 echo "Done"
 
