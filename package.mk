@@ -59,7 +59,7 @@ DEB_PREREQS := debian/control debian/changelog
 DEBUILD_ENV := PG_HOME="$(PG_HOME)" GP_MAJORVERSION="$(GP_MAJORVERSION)"
 DEBUILD_CMD := debuild --preserve-env -us -uc -b
 
-PACKAGE_DIR := Package/$(PACKAGE_DEBIAN)_$(PACKAGE_VERSION)
+PACKAGE_DIR := $(or $(strip $(DEB_PACKAGES)),Package/$(PACKAGE_DEBIAN)_$(PACKAGE_VERSION))
 
 #---------------------------------------------------------------------
 # Diagnostics

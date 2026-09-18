@@ -75,7 +75,7 @@ function prepare_build_user() {
 function run_build() {
     chown "$BUILD_USER" ..
 
-    sudo --preserve-env=GP_MAJORVERSION,PG_HOME,DISKQUOTA_PACKAGE_VERSION \
+    sudo --preserve-env=GP_MAJORVERSION,PG_HOME,DISKQUOTA_PACKAGE_VERSION,DEB_PACKAGES \
         --user "$BUILD_USER" -- \
         make -f package.mk
 }
