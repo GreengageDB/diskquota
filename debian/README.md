@@ -168,7 +168,7 @@ does not need to be installed on the host.
 
 ```bash
 ci/build_in_docker_local.sh
-````
+```
 
 The default configuration is Greengage 6 on Ubuntu 22.04. Greengage and
 Ubuntu versions can be specified explicitly:
@@ -178,9 +178,11 @@ ci/build_in_docker_local.sh 6 24.04
 ci/build_in_docker_local.sh 7 22.04
 ```
 
-The build script determines the Greengage major version from the
-developer image and runs the package build as the owner of the mounted
-source tree when possible, avoiding root-owned build artifacts.
+The `ci/build_in_docker.sh` script determines the Greengage major version
+from the developer image and runs the package build as the owner of the
+mounted source tree, avoiding root-owned build artifacts. The script
+must be run as root inside the Greengage developer image and is not
+intended for direct execution on a host system.
 
 Resulting `.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
 
