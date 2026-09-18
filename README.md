@@ -174,7 +174,7 @@ To skip formatting a certain piece of code:
 
 ## Building a DEB package
 
-`.deb` packages are built per GPDB major version using debhelper
+`.deb` packages are built per Greengage major version using debhelper
 (`debian/`, `package.mk`), not `cpack`. See
 [debian/README.md](debian/README.md) for the full packaging reference
 (environment variables, generated files, build flow).
@@ -183,7 +183,17 @@ Local build in a container (recommended — no need to install the
 Greengage build toolchain on the host):
 
 ```
-GP_MAJORVERSION=6 ci/build_in_docker_local.sh
+ci/build_in_docker_local.sh
+```
+
+The wrapper accepts two optional arguments: the Greengage major version
+and the Ubuntu version. Defaults are 6 / 22.04.
+
+Examples:
+
+```
+ci/build_in_docker_local.sh 6 24.04
+ci/build_in_docker_local.sh 7 22.04
 ```
 
 Local build on a host with Greengage already installed:
@@ -195,13 +205,15 @@ export PG_HOME=/opt/greengagedb/greengage${GP_MAJORVERSION}
 make -f package.mk pkg
 ```
 
-Repeat with `GP_MAJORVERSION=7` for the GP7 package. Resulting
-`.deb`/`.ddeb`/`.buildinfo`/`.changes` land in `./Package/`.
+Resulting `.deb`, `.ddeb`, `.build`, `.buildinfo`, and `.changes` land
+in `./Package/greengage${GP_MAJORVERSION}-diskquota_${PACKAGE_VERSION}/`.
+The output directory can be overridden with `DEB_PACKAGES`.
 
-CI builds GP6 (Ubuntu 22.04, 24.04) and GP7 (Ubuntu 22.04) via
-`.github/workflows/build_and_package.yml`, running the same
-`ci/build_in_docker.sh` inside the matching Greengage developer image
-(`ghcr.io/greengagedb/greengage/ggdb<version>_<os>`).
+CI builds the same set via `.github/workflows/build_and_package.yml`,
+running `ci/build_in_docker.sh` inside the matching Greengage developer
+image (`ghcr.io/greengagedb/greengage/ggdb<version>_<os>`). The matrix
+of supported `gp_version` / `target_os_version` combinations lives in
+that workflow.
 
 # Usage
 1. Set/update/delete schema quota limit using diskquota.set_schema_quota

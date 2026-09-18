@@ -12,7 +12,7 @@ SHELL := /bin/bash
 INFO_TARGETS := help version-info
 
 ifeq ($(strip $(GP_MAJORVERSION)),)
-  ifeq ($(filter $(MAKECMDGOALS),$(INFO_TARGETS)),)
+  ifeq ($(filter $(INFO_TARGETS),$(MAKECMDGOALS)),)
     $(error GP_MAJORVERSION must be set)
   endif
 endif
@@ -60,7 +60,7 @@ PACKAGE_DIR := $(or $(strip $(DEB_PACKAGES)),Package/$(PACKAGE_DEBIAN)_$(PACKAGE
 
 version-info:
 	@echo "PACKAGE_VERSION: $(PACKAGE_VERSION)"
-	@echo "PACKAGE_DEBIAN:  $(PACKAGE_DEBIAN)"
+	@echo "PACKAGE_DEBIAN:  $(if $(strip $(GP_MAJORVERSION)),$(PACKAGE_DEBIAN),<GP_MAJORVERSION not set>)"
 	@echo "DISTRO_CODENAME: $(DISTRO_CODENAME)"
 	@echo "IS_RELEASE:      $(IS_RELEASE)"
 	@echo "BUILD_TYPE:      $(BUILD_TYPE)"
@@ -105,7 +105,7 @@ pkg-deb: $(DEB_PREREQS)
 
 help:
 	@echo "Usage:"
-	@echo "  make GP_MAJORVERSION=<6|7> [target]"
+	@echo "  GP_MAJORVERSION=6 make -f package.mk [target]"
 	@echo ""
 	@echo "Targets:"
 	@echo "  pkg            Build Debian package (default)"
