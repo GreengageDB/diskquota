@@ -8,21 +8,14 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := pkg
 
-# Require an explicit version for package-producing goals.
-# Other goals may use the default for local convenience.
-GP_MAJORVERSION_DEFAULT := 6
-PACKAGING_GOALS         := pkg pkg-deb debian/control debian/changelog
+# Require an explicit version for all targets except informational ones.
+INFO_TARGETS := help version-info
 
-ifeq ($(origin GP_MAJORVERSION),undefined)
-ifneq (,$(filter $(PACKAGING_GOALS),$(or $(MAKECMDGOALS),$(.DEFAULT_GOAL))))
-$(error GP_MAJORVERSION is not set (e.g. GP_MAJORVERSION=6); required to build a package)
-else
-$(warning GP_MAJORVERSION is not set; defaulting to $(GP_MAJORVERSION_DEFAULT) for \
-	'$(or $(MAKECMDGOALS),$(.DEFAULT_GOAL))' - pass GP_MAJORVERSION=<N> explicitly \
-	to target a different Greengage major version)
+ifeq ($(strip $(GP_MAJORVERSION)),)
+  ifeq ($(filter $(MAKECMDGOALS),$(INFO_TARGETS)),)
+    $(error GP_MAJORVERSION must be set)
+  endif
 endif
-endif
-GP_MAJORVERSION ?= $(GP_MAJORVERSION_DEFAULT)
 
 #---------------------------------------------------------------------
 # Metadata
@@ -76,19 +69,18 @@ version-info:
 # Control file / changelog generation
 #---------------------------------------------------------------------
 
-# Regenerate files because their contents depend on environment/git state.
-debian/control: debian/control.in
-	@echo "=== Generating debian/control for GP$(GP_MAJORVERSION) ==="
-	sed 's|@GP_MAJORVERSION@|$(GP_MAJORVERSION)|g' $< > $@
-
 changelog: debian/changelog
-
 debian/changelog: debian/control
 	@echo "$(PACKAGE_SOURCE) ($(PACKAGE_VERSION)) $(DISTRO_CODENAME); urgency=low" > $@
 	@echo "" >> $@
 	@echo "  * $(BUILD_TYPE)" >> $@
 	@echo "" >> $@
 	@echo " -- $(MAINTAINER)  $(DATE_RFC)" >> $@
+
+# Regenerate files because their contents depend on Greengage version.
+debian/control: debian/control.in
+	@echo "=== Generating debian/control for GP$(GP_MAJORVERSION) ==="
+	sed 's|@GP_MAJORVERSION@|$(GP_MAJORVERSION)|g' $< > $@
 
 #---------------------------------------------------------------------
 # Packaging
@@ -111,4 +103,16 @@ pkg-deb: $(DEB_PREREQS)
 	mv ../$(PACKAGE_DEBIAN){,-dbgsym}_$(PACKAGE_VERSION)_*.*deb $(PACKAGE_DIR)/; \
 	mv ../$(PACKAGE_SOURCE)_$(PACKAGE_VERSION)_*.{build,buildinfo,changes} $(PACKAGE_DIR)/
 
-.PHONY: pkg pkg-deb changelog debian/changelog debian/control version-info
+help:
+	@echo "Usage:"
+	@echo "  make GP_MAJORVERSION=<6|7> [target]"
+	@echo ""
+	@echo "Targets:"
+	@echo "  pkg            Build Debian package (default)"
+	@echo "  pkg-deb        Build Debian package"
+	@echo "  debian/control Generate debian/control"
+	@echo "  changelog      Generate debian/changelog"
+	@echo "  version-info   Show package version and build metadata"
+	@echo "  help           Show this help"
+
+.PHONY: help pkg pkg-deb changelog debian/changelog debian/control version-info
