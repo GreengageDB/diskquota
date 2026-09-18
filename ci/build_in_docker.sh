@@ -6,7 +6,7 @@
 #          layout. Installs the matching Greengage package and runs the
 #          package build as an unprivileged user.
 
-set -eox pipefail
+set -eo pipefail
 
 function assert_root() {
     if [ "$(id -u)" -ne 0 ]; then
