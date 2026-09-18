@@ -50,7 +50,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.DEB_PACKAGES }}
-          path: Package/*
+          path: Package/greengage${{ matrix.gp_version }}-diskquota*/
 
       - name: Test install deb-packages in Docker 
         uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
