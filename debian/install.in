@@ -1,0 +1,2 @@
+@PG_HOME_REL@/lib/postgresql/*
+@PG_HOME_REL@/share/postgresql/extension/*

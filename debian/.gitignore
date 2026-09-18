@@ -1,0 +1,9 @@
+# debian/.gitignore
+/*
+!/.gitignore
+!/*.in
+!/compat
+!/copyright
+!/lintian-overrides
+!/rules
+!/README*

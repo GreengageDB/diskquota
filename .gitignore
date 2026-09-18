@@ -11,3 +11,10 @@ tags
 cscope*
 .ccls-cache/
 compile_commands.json
+
+# CMake
+/obj-*/
+
+# Packages
+/Package/
+/.debuilder.lock

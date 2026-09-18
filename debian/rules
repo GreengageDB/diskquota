@@ -1,0 +1,45 @@
+#!/usr/bin/make -f
+# debian/rules
+
+DH_VERBOSE = 1
+
+# GP_MAJORVERSION is required for package builds
+ifndef GP_MAJORVERSION
+$(error GP_MAJORVERSION is not set (expected e.g. GP_MAJORVERSION=6))
+endif
+
+# PG_HOME / PG_CONFIG: env value if non-empty, otherwise default.
+PG_HOME   := $(or $(strip $(PG_HOME)),/opt/greengagedb/greengage$(GP_MAJORVERSION))
+PG_CONFIG := $(or $(strip $(PG_CONFIG)),$(PG_HOME)/bin/pg_config)
+
+# Ask pg_config who it is. Empty output = not runnable or not Greengage.
+PG_CONFIG_MAJOR := $(shell $(PG_CONFIG) --gp_version 2>/dev/null \
+    | sed -n 's/^Greengage \([0-9][0-9]*\).*/\1/p')
+
+ifeq ($(strip $(PG_CONFIG_MAJOR)),)
+$(error $(PG_CONFIG) is not a usable Greengage pg_config \
+        (no "Greengage <major>" in --gp_version output))
+endif
+
+ifneq ($(PG_CONFIG_MAJOR),$(GP_MAJORVERSION))
+$(error $(PG_CONFIG) reports Greengage $(PG_CONFIG_MAJOR), \
+        but GP_MAJORVERSION=$(GP_MAJORVERSION))
+endif
+
+export DEB_BUILD_OPTIONS = nocheck
+
+%:
+	dh $@ --buildsystem=cmake
+
+override_dh_auto_configure:
+	@test -x "$(PG_CONFIG)" || { echo "pg_config not found or not executable at $(PG_CONFIG)"; exit 1; }
+	@echo "=== GP$(GP_MAJORVERSION) ==="
+	@sed 's|@PG_HOME_REL@|$(PG_HOME:/%=%)|g' debian/install.in > debian/install
+	@sed 's|@PG_HOME_REL@|$(PG_HOME:/%=%)|g' debian/not-installed.in > debian/not-installed
+	dh_auto_configure -- \
+		-DPG_CONFIG=$(PG_CONFIG) \
+		-DCMAKE_BUILD_TYPE=RelWithDebInfo \
+		-DCMAKE_INSTALL_PREFIX=$(PG_HOME)
+
+override_dh_auto_install:
+	dh_auto_install --destdir=debian/tmp
