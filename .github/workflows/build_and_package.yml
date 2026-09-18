@@ -46,13 +46,11 @@ jobs:
             $GGDB_IMAGE \
             ci/build_in_docker.sh
 
-          mv Package $DEB_PACKAGES
-
       - name: Upload deb packages
         uses: actions/upload-artifact@v7
         with:
           name: ${{ env.DEB_PACKAGES }}
-          path: ${{ env.DEB_PACKAGES }}
+          path: Package/*
 
       - name: Test install deb-packages in Docker 
         uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
