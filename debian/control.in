@@ -2,6 +2,7 @@ Source: diskquota
 Maintainer: Greengage <greengage@greengagedb.org>
 Section: database
 Build-Depends: debhelper (>= 13),
+	 cmake,
 	 lsb-release,
 	 greengage@GP_MAJORVERSION@
 

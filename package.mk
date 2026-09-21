@@ -95,6 +95,7 @@ pkg-deb: $(DEB_PREREQS)
 		echo "ERROR: another Debian package build is already running"; \
 		exit 1; \
 	}; \
+	set -e; \
 	trap 'rmdir "$(LOCK_DIR)"' EXIT; \
 	echo "Building $(PACKAGE_DEBIAN) $(PACKAGE_VERSION)"; \
 	$(DEBUILD_ENV) DH_OPTIONS="-p $(PACKAGE_DEBIAN)" $(DEBUILD_CMD); \
