@@ -12,7 +12,7 @@ SHELL := /bin/bash
 INFO_TARGETS := help version-info
 
 ifeq ($(strip $(GP_MAJORVERSION)),)
-  ifeq ($(filter $(INFO_TARGETS),$(MAKECMDGOALS)),)
+  ifneq ($(strip $(filter-out $(INFO_TARGETS),$(or $(MAKECMDGOALS),$(.DEFAULT_GOAL),unknown))),)
     $(error GP_MAJORVERSION must be set)
   endif
 endif
