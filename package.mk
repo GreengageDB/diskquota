@@ -42,8 +42,21 @@ endif
 # Convert git describe versions to valid Debian versions.
 # Matches <version>-<commits>-<hash> and converts it to
 # <version>+dev.<commits>.<hash>.
+#
+# Sanitization:
+#   - removes a common leading "v"
+#   - replaces unsupported characters with "."
+#   - collapses repeated dots
+#   - removes separators at the beginning and end
 PACKAGE_VERSION := $(shell printf '%s' '$(RAW_VERSION)' | \
-                     perl -pe 's/^(.*)-([0-9]+)-(g[0-9a-f]+)$$/\1+dev.\2.\3/')
+	perl -pe '\
+		s/^v//; \
+		s/^(.*)-([0-9]+)-(g[0-9a-f]+)$$/\1+dev.\2.\3/; \
+		s/[^0-9A-Za-z.+~-]+/./g; \
+		s/[.]{2,}/./g; \
+		s/^[.+~-]+//; \
+		s/[.+~-]+$$//; \
+	')
 
 IS_RELEASE  := $(if $(findstring +dev,$(PACKAGE_VERSION)),no,yes)
 BUILD_TYPE  := $(if $(filter yes,$(IS_RELEASE)),Release build,Development build)
