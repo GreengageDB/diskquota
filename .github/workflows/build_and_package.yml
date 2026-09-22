@@ -28,9 +28,8 @@ jobs:
             target_os_version: '22.04'
             gp_version: 7
     runs-on: ubuntu-24.04
-    container:
-      image: ghcr.io/greengagedb/greengage/ggdb${{ matrix.gp_version }}_${{ matrix.target_os }}${{ matrix.target_os_version != '22.04' && matrix.target_os_version || '' }}:latest
     env:
+      GGDB_IMAGE:   ghcr.io/greengagedb/greengage/ggdb${{ matrix.gp_version}}_${{ matrix.target_os}}${{ matrix.target_os_version != '22.04' && matrix.target_os_version || '' }}:latest
       DEB_PACKAGES: deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
 
     steps:
@@ -38,9 +37,15 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-
-      - name: Build and package
-        run: ci/build_in_docker.sh
+      - name: Build in Docker using docker run
+        run: |
+          set -eux
+          docker run \
+            --rm \
+            -e DEB_PACKAGES \
+            -v ${{ github.workspace }}:/diskquota/src -w /diskquota/src \
+            $GGDB_IMAGE \
+            ci/build_in_docker.sh
 
       - name: Upload deb packages
         uses: actions/upload-artifact@v7
@@ -48,7 +53,7 @@ jobs:
           name: ${{ env.DEB_PACKAGES }}
           path: ${{ env.DEB_PACKAGES }}
 
-      - name: Test install deb-packages in Docker
+      - name: Test install deb-packages in Docker 
         uses: greengagedb/greengage-ci/.github/actions/tests/install/deb@v45
         with:
           test_docker: ${{ matrix.target_os}}:${{ matrix.target_os_version }}
