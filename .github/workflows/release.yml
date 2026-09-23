@@ -36,4 +36,4 @@ jobs:
           target_os:            ${{ matrix.target_os }}
           target_os_version:    ${{ matrix.target_os_version }}
           extensions:           ${{ matrix.extensions }}
-          artifact_prefix:      deb-packages-greengage${{ matrix.gp_version }}-diskquota-${{ matrix.target_os }}${{ matrix.target_os_version }}
+          artifact_prefix:      deb-packages-greengage${{ matrix.gp_version }}-diskquota
