@@ -282,6 +282,19 @@ _PG_init(void)
 			ereport(LOG, (errmsg("[diskquota] altering diskquota version to " DISKQUOTA_VERSION ".")));
 			return;
 		}
+
+		/*
+		 * To support ggupgrade from cluster with diskquota, we should skip the
+		 * library check during ggupgrade run, when isBinaryUpgrade is set.
+		 * We can't set shared_preload_libraries, because target cluster
+		 * doesn't exist yet.
+		 */
+		if (IsBinaryUpgrade)
+		{
+			ereport(LOG, (errmsg("[diskquota] binary upgrade mode, not booting up diskquota")));
+			return;
+		}
+
 		ereport(ERROR, (errmsg("[diskquota] booting " DISKQUOTA_VERSION ", but " DISKQUOTA_BINARY_NAME
 		                       " not in shared_preload_libraries. abort.")));
 	}
