@@ -285,7 +285,9 @@ _PG_init(void)
 		
 		/*
 		 * To support ggupgrade from cluster with diskquota, we should skip the
-		 * library check during pg_upgrade run, when isBinaryUpgrade is set.
+		 * library check during ggupgrade run, when isBinaryUpgrade is set.
+		 * We can't set shared_preload_libraries, because target cluster 
+		 * doesn't exist yet.
 		 */
 		if (IsBinaryUpgrade)
 		{
