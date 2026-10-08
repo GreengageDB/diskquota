@@ -274,7 +274,8 @@ _PG_init(void)
 	if (!process_shared_preload_libraries_in_progress)
 	{
 		/*
-		 * To support the continuous upgrade/downgrade, we should skip the library
+		 * To support the continuous upgrade/downgrade,
+		 * we should skip the library
 		 * check in _PG_init() during upgrade/downgrade.
 		 */
 		if (IsNormalProcessingMode() && check_alter_extension())

@@ -220,9 +220,9 @@ function(RegressTarget_Add name)
         ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/regress_show_diff.sh ${working_DIR}
     )
 
-    if(arg_REGRESS_TYPE STREQUAL isolation2)
-        add_dependencies(${name} pg_isolation2_regress)
-    endif()
+    # if(arg_REGRESS_TYPE STREQUAL isolation2)
+    #     add_dependencies(${name} pg_isolation2_regress)
+    # endif()
 
     # Add targets for easily showing results diffs
     FILE(GLOB expected_files ${expected_DIR}/*.out)
