@@ -9,10 +9,6 @@ make_cluster
 source /usr/local/greengage-db-devel/greengage_path.sh
 source /home/gpadmin/gpdb_src/gpAux/gpdemo/gpdemo-env.sh
 
-pushd /home/gpadmin/gpdb_src
-  make -C src/test/isolation2 install
-popd
-
 pushd "$(dirname "$0")/.."
   git config --global --add safe.directory $(pwd)
   mkdir build
