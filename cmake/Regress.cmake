@@ -128,7 +128,7 @@ function(RegressTarget_Add name)
     # Isolation2 test has different executable to run
     if(arg_REGRESS_TYPE STREQUAL isolation2)
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/isolation2/pg_isolation2_regress)
-        _PGIsolation2Target_Add(${working_DIR})
+        # _PGIsolation2Target_Add(${working_DIR})
     else()
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/regress/pg_regress)
     endif()
