@@ -43,22 +43,6 @@
 # CMAKE_CURRENT_FUNCTION_LIST_DIR - 3.17
 cmake_minimum_required(VERSION 3.17)
 
-# pg_isolation2_regress was not shipped with GPDB release. It needs to be created from source.
-function(_PGIsolation2Target_Add working_DIR)
-    if(TARGET pg_isolation2_regress)
-        return()
-    endif()
-
-    add_custom_target(
-        pg_isolation2_regress
-        COMMAND
-        make -C ${PG_SRC_DIR}/src/test/isolation2 install
-        COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different
-        ${PG_SRC_DIR}/src/test/isolation2/sql_isolation_testcase.py ${working_DIR}
-    )
-endfunction()
-
 # Find all tests in the given directory which uses fault injector, and add them to
 # fault_injector_test_list.
 function(_Find_FaultInjector_Tests sql_DIR)
@@ -127,14 +111,15 @@ function(RegressTarget_Add name)
 
     # Isolation2 test has different executable to run
     if(arg_REGRESS_TYPE STREQUAL isolation2)
-        set(regress_BIN ${PG_SRC_DIR}/src/test/isolation2/pg_isolation2_regress)
-        _PGIsolation2Target_Add(${working_DIR})
+        set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/isolation2/pg_isolation2_regress)
     else()
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/regress/pg_regress)
-        if (NOT EXISTS ${regress_BIN})
-            message(FATAL_ERROR
-                "Cannot find 'pg_regress' executable by path '${regress_BIN}'. Is 'pg_config' in the $PATH?")
-        endif()
+    endif()
+
+    if(NOT EXISTS ${regress_BIN})
+        get_filename_component(regress_NAME ${regress_BIN} NAME)
+        message(FATAL_ERROR
+            "Cannot find '${regress_NAME}' executable by path '${regress_BIN}'. Is 'pg_config' in the $PATH?")
     endif()
 
     # Link input sql files to the build dir
@@ -219,10 +204,6 @@ function(RegressTarget_Add name)
         ||
         ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/regress_show_diff.sh ${working_DIR}
     )
-
-    if(arg_REGRESS_TYPE STREQUAL isolation2)
-        add_dependencies(${name} pg_isolation2_regress)
-    endif()
 
     # Add targets for easily showing results diffs
     FILE(GLOB expected_files ${expected_DIR}/*.out)
