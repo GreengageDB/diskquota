@@ -127,14 +127,16 @@ function(RegressTarget_Add name)
 
     # Isolation2 test has different executable to run
     if(arg_REGRESS_TYPE STREQUAL isolation2)
-        set(regress_BIN ${PG_SRC_DIR}/src/test/isolation2/pg_isolation2_regress)
+        set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/isolation2/pg_isolation2_regress)
         _PGIsolation2Target_Add(${working_DIR})
     else()
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/regress/pg_regress)
-        if (NOT EXISTS ${regress_BIN})
-            message(FATAL_ERROR
-                "Cannot find 'pg_regress' executable by path '${regress_BIN}'. Is 'pg_config' in the $PATH?")
-        endif()
+    endif()
+
+    if(NOT EXISTS ${regress_BIN})
+        get_filename_component(regress_NAME ${regress_BIN} NAME)
+        message(FATAL_ERROR
+            "Cannot find '${regress_NAME}' executable by path '${regress_BIN}'. Is 'pg_config' in the $PATH?")
     endif()
 
     # Link input sql files to the build dir
@@ -219,10 +221,6 @@ function(RegressTarget_Add name)
         ||
         ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/regress_show_diff.sh ${working_DIR}
     )
-
-    if(arg_REGRESS_TYPE STREQUAL isolation2)
-        add_dependencies(${name} pg_isolation2_regress)
-    endif()
 
     # Add targets for easily showing results diffs
     FILE(GLOB expected_files ${expected_DIR}/*.out)
