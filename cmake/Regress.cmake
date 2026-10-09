@@ -43,22 +43,6 @@
 # CMAKE_CURRENT_FUNCTION_LIST_DIR - 3.17
 cmake_minimum_required(VERSION 3.17)
 
-# pg_isolation2_regress was not shipped with GPDB release. It needs to be created from source.
-function(_PGIsolation2Target_Add working_DIR)
-    if(TARGET pg_isolation2_regress)
-        return()
-    endif()
-
-    add_custom_target(
-        pg_isolation2_regress
-        COMMAND
-        make -C ${PG_SRC_DIR}/src/test/isolation2 install
-        COMMAND
-        ${CMAKE_COMMAND} -E copy_if_different
-        ${PG_SRC_DIR}/src/test/isolation2/sql_isolation_testcase.py ${working_DIR}
-    )
-endfunction()
-
 # Find all tests in the given directory which uses fault injector, and add them to
 # fault_injector_test_list.
 function(_Find_FaultInjector_Tests sql_DIR)
@@ -128,7 +112,6 @@ function(RegressTarget_Add name)
     # Isolation2 test has different executable to run
     if(arg_REGRESS_TYPE STREQUAL isolation2)
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/isolation2/pg_isolation2_regress)
-        # _PGIsolation2Target_Add(${working_DIR})
     else()
         set(regress_BIN ${PG_PKG_LIB_DIR}/pgxs/src/test/regress/pg_regress)
     endif()
