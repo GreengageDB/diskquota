@@ -2,7 +2,7 @@
 set -xeo pipefail
 
 source gpdb_src/concourse/scripts/common.bash
-install_gpdb 
+install_gpdb
 gpdb_src/concourse/scripts/setup_gpadmin_user.bash
 make_cluster
 
