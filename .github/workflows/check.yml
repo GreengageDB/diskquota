@@ -4,7 +4,6 @@ on:
   pull_request:
     paths-ignore:
       - "docs/**"
-      - "cmake/**"
       - "test/**"
       - "upgrade_test/**"
       - "*.md"
