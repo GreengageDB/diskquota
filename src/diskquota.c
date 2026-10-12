@@ -271,10 +271,10 @@ void
 _PG_init(void)
 {
 	/*
-	 * To support pg_upgrade and ggupgrade from cluster with diskquota,
-	 * we should skip the library check during ggupgrade run, when
-	 * isBinaryUpgrade is set.
-	 * If an extension is loaded in binary upgrade mode, it could interact
+	 * To support pg_upgrade from cluster with diskquota, we should 
+	 * skip loading the library during pg_upgrade run, when 
+	 * IsBinaryUpgrade is set.
+	 * If diskquota is loaded in binary upgrade mode, it could interact
 	 * with database while migrating data, which can affect data migration.
 	 */
 	if (IsBinaryUpgrade)
@@ -295,7 +295,6 @@ _PG_init(void)
 			ereport(LOG, (errmsg("[diskquota] altering diskquota version to " DISKQUOTA_VERSION ".")));
 			return;
 		}
-
 		ereport(ERROR, (errmsg("[diskquota] booting " DISKQUOTA_VERSION ", but " DISKQUOTA_BINARY_NAME
 		                       " not in shared_preload_libraries. abort.")));
 	}
