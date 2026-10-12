@@ -274,7 +274,7 @@ _PG_init(void)
 	* To support pg_upgrade and ggupgrade from cluster with diskquota,
 	* we should skip the library check during ggupgrade run, when
 	* isBinaryUpgrade is set.
-	* If an extension is loaded in binary upgrade mode, it could interact 
+	* If an extension is loaded in binary upgrade mode, it could interact
 	* with database while migrating data, which can affect data migration.
 	*/
 	if (IsBinaryUpgrade)
