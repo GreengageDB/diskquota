@@ -17,7 +17,7 @@ pushd "$(dirname "$0")/.."
     cmake --build .
     make install
   popd
-  chown -R gpadmin:gpadmin . /usr/local/greengage-db-devel
+  # chown -R gpadmin:gpadmin .
 popd
 
 mkdir -p /logs
