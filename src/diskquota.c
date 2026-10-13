@@ -272,7 +272,7 @@ _PG_init(void)
 {
 	/*
 	 * To support pg_upgrade from cluster with diskquota, we should
-	 * skip loading the library during pg_upgrade run, when
+	 * skip initializing diskquota during pg_upgrade run, when
 	 * IsBinaryUpgrade is set.
 	 * If diskquota is loaded in binary upgrade mode, it could interact
 	 * with database while migrating data, which can affect data migration.
