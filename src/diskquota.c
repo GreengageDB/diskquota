@@ -270,6 +270,19 @@ check_alter_extension(void)
 void
 _PG_init(void)
 {
+	/*
+	 * To support pg_upgrade from cluster with diskquota, we should
+	 * skip initializing diskquota during pg_upgrade run, when
+	 * IsBinaryUpgrade is set.
+	 * If diskquota is loaded in binary upgrade mode, it could interact
+	 * with database while migrating data, which can affect data migration.
+	 */
+	if (IsBinaryUpgrade)
+	{
+		ereport(LOG, (errmsg("[diskquota] binary upgrade mode, not booting up diskquota")));
+		return;
+	}
+
 	/* diskquota.so must be in shared_preload_libraries to init SHM. */
 	if (!process_shared_preload_libraries_in_progress)
 	{
